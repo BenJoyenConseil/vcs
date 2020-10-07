@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 )
 
 func WriteTree(directory string) (string, error) {
@@ -33,4 +35,31 @@ func WriteTree(directory string) (string, error) {
 	oid := PutObject(tree, TREE)
 	log.Println(oid)
 	return oid, nil
+}
+
+func ReadTree(oid string, basePath ...string) error {
+	data, _type, err := GetObject(oid)
+	path := "."
+	if len(basePath) > 0 {
+		path = basePath[0]
+	}
+	if _type != TREE {
+		return nil
+	}
+	for _, line := range strings.Split(data, "\n") {
+		lineSplits := strings.Split(line, " ")
+
+		if ObjectType(lineSplits[0]) == TREE {
+			dir := fmt.Sprintf("%s/%s", path, lineSplits[2])
+			os.Mkdir(dir, 0777)
+			ReadTree(lineSplits[1], dir)
+		} else {
+			d, _, err := GetObject(lineSplits[1])
+			if err != nil {
+				return err
+			}
+			ioutil.WriteFile(fmt.Sprintf("%s/%s", path, lineSplits[2]), []byte(d), 0777)
+		}
+	}
+	return err
 }

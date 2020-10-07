@@ -1,11 +1,12 @@
 package data
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUInit(t *testing.T) {
@@ -15,9 +16,7 @@ func TestUInit(t *testing.T) {
 	UInit(dir)
 
 	// then
-	if _, err := os.Stat("/tmp/.ugit"); os.IsNotExist(err) {
-		t.Error(err)
-	}
+	assert.DirExists(t, "/tmp/.ugit")
 }
 
 func TestHashObject(t *testing.T) {
@@ -27,9 +26,7 @@ func TestHashObject(t *testing.T) {
 	result := HashObbject([]byte("Hello World"))
 
 	// then
-	if string(result) != "0a4d55a8d778e5022fab701977c5d840bbc486d0" {
-		t.Errorf("Fail result = %s", result)
-	}
+	assert.Equal(t, "0a4d55a8d778e5022fab701977c5d840bbc486d0", string(result))
 }
 
 func TestPutObject(t *testing.T) {
@@ -38,13 +35,12 @@ func TestPutObject(t *testing.T) {
 	expected := fmt.Sprintf("%s%s%s", "blob", string('\x00'), "Hello World")
 
 	// when
-	PutObject(contentToVersion, BLOB)
+	PutObject(contentToVersion)
 
 	// then
+	assert.FileExists(t, ".ugit/objects/0a6649a0077da1bf5a8b3b5dd3ea733ea6a81938")
 	result, _ := ioutil.ReadFile(".ugit/objects/0a6649a0077da1bf5a8b3b5dd3ea733ea6a81938")
-	if bytes.Compare([]byte(expected), result) != 0 {
-		t.Error("Fail. actual : ", result, " expected : ", []byte(expected))
-	}
+	assert.Equal(t, result, []byte(expected))
 
 	// teardown
 	os.Remove("tmp")
@@ -56,18 +52,15 @@ func TestGetObject(t *testing.T) {
 	oid := "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 	objectContent := "Hello World"
 	os.MkdirAll(OBJECTS_DIR, 0777)
-	ioutil.WriteFile(".ugit/objects/0a4d55a8d778e5022fab701977c5d840bbc486d0", []byte(objectContent), 0777)
+	ioutil.WriteFile(".ugit/objects/"+oid, []byte("blob"+string('\x00')+objectContent), 0777)
 
 	//when
-	result, _type := GetObject(oid)
+	result, _type, err := GetObject(oid)
 
 	// then
-	if result != objectContent {
-		t.Error("Data content is not correcte. actual : ", result, " != expected : ", objectContent)
-	}
-	if _type != "blob" {
-		t.Error("Type is not correct. actual : ", _type, "expected : ", "blob")
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, objectContent, result)
+	assert.Equal(t, _type, BLOB)
 
 	// teardown
 	os.RemoveAll(".ugit")
