@@ -57,7 +57,7 @@ func TestReadTree(t *testing.T) {
 	// given
 	oid := "2099e065ed4f38fc997ca05a706ab6ad31663225"
 	setupUgitDir()
-	os.Mkdir("tmp", 0777)
+	setupTmpDir()
 
 	// // when
 	err := ReadTree(oid, "tmp")

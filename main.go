@@ -33,6 +33,8 @@ func main() {
 			fmt.Println(data.PutObject(os.Args[2], data.BLOB))
 			os.Exit(0)
 		}
+	default:
+		log.Println("Usage Ugit")
 	}
 	os.Exit(1)
 }

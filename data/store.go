@@ -21,7 +21,7 @@ const (
 )
 
 func UInit(dir string) {
-	initDir := filepath.Clean(fmt.Sprintf("%s/%s", dir, UGIT_DIR))
+	initDir, _ := filepath.Abs(fmt.Sprintf("%s/%s", dir, UGIT_DIR))
 	log.Printf("Initialize uGit in the following directory : %s", initDir)
 	err := os.MkdirAll(initDir, 0777)
 	if err != nil {
@@ -36,7 +36,7 @@ func HashObbject(data []byte) []byte {
 	return oid
 }
 
-func PutObject(data string, objectType ...ObjectType) (oid string) {
+func PutObject(data string, objectType ...ObjectType) (oid string, err error) {
 	_type := BLOB
 	if len(objectType) > 0 {
 		_type = objectType[0]
@@ -45,11 +45,8 @@ func PutObject(data string, objectType ...ObjectType) (oid string) {
 	oid = string(HashObbject(encoded))
 	objectPath := fmt.Sprintf("%s/%s", OBJECTS_DIR, oid)
 	os.MkdirAll(OBJECTS_DIR, 0777)
-	err := ioutil.WriteFile(objectPath, encoded, 0777)
-	if err != nil {
-		log.Println("Error putting object : ", err)
-	}
-	return oid
+	err = ioutil.WriteFile(objectPath, encoded, 0777)
+	return oid, err
 }
 
 func GetObject(oid string) (string, ObjectType, error) {

@@ -8,58 +8,71 @@ import (
 	"strings"
 )
 
-func WriteTree(directory string) (string, error) {
+func WriteTree(directory string) (oid string, err error) {
 	tree := ""
-	files, err := ioutil.ReadDir(directory)
-	if err != nil {
-		log.Println(err)
-		return tree, err
+	var files []os.FileInfo
+	if files, err = ioutil.ReadDir(directory); err != nil {
+		return "", err
 	}
+
 	for _, f := range files {
 		if f.Name() == ".ugit" {
 			break
 		}
 		path := fmt.Sprintf("%s/%s", directory, f.Name())
 		if f.IsDir() {
-			oid, _ := WriteTree(path)
-			tree += fmt.Sprintf("%s %s %s\n", "tree", oid, f.Name())
+			oid, err = WriteTree(path)
+			tree += fmt.Sprintf("%s %s %s\n", TREE, oid, f.Name())
 		} else {
-			data, err := ioutil.ReadFile(path)
-			if err != nil {
-				log.Println(err)
+			var data []byte
+			if data, err = ioutil.ReadFile(path); err != nil {
+				return "", err
 			}
-			oid := PutObject(string(data), BLOB)
-			tree += fmt.Sprintf("%s %s %s\n", "blob", oid, f.Name())
+			oid, err = PutObject(string(data), BLOB)
+			tree += fmt.Sprintf("%s %s %s\n", BLOB, oid, f.Name())
+		}
+		if err != nil {
+			return "", err
 		}
 	}
-	oid := PutObject(tree, TREE)
-	log.Println(oid)
-	return oid, nil
+	oid, err = PutObject(tree, TREE)
+	return oid, err
 }
 
 func ReadTree(oid string, basePath ...string) error {
-	data, _type, err := GetObject(oid)
 	path := "."
 	if len(basePath) > 0 {
 		path = basePath[0]
 	}
-	if _type != TREE {
-		return nil
+	log.Printf("Restoring tree {%s} in location %s", oid, path)
+	data, _, err := GetObject(oid)
+	if err != nil {
+		return err
 	}
-	for _, line := range strings.Split(data, "\n") {
-		lineSplits := strings.Split(line, " ")
+	os.RemoveAll(path)
+	os.Mkdir(path, 0777)
 
-		if ObjectType(lineSplits[0]) == TREE {
-			dir := fmt.Sprintf("%s/%s", path, lineSplits[2])
-			os.Mkdir(dir, 0777)
-			ReadTree(lineSplits[1], dir)
+	treeLines := strings.Split(data, "\n")
+	for _, line := range treeLines {
+		lineSplits := strings.Split(line, " ")
+		t := ObjectType(lineSplits[0])
+		o := lineSplits[1]
+		p := lineSplits[2]
+
+		if t == TREE {
+			subdir := fmt.Sprintf("%s/%s", path, p)
+			if err := ReadTree(o, subdir); err != nil {
+				return err
+			}
 		} else {
-			d, _, err := GetObject(lineSplits[1])
+			d, _, err := GetObject(o)
 			if err != nil {
 				return err
 			}
-			ioutil.WriteFile(fmt.Sprintf("%s/%s", path, lineSplits[2]), []byte(d), 0777)
+			filePath := fmt.Sprintf("%s/%s", path, p)
+			log.Println("Creating file ", filePath)
+			ioutil.WriteFile(filePath, []byte(d), 0777)
 		}
 	}
-	return err
+	return nil
 }
