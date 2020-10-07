@@ -1,8 +1,10 @@
 package data
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,5 +78,60 @@ func TestReadTree(t *testing.T) {
 	assert.Equal(t, "Hello", string(d))
 	d, _ = ioutil.ReadFile("tmp/dogs.txt")
 	assert.Equal(t, "World", string(d))
+	teardown()
+}
+
+func TestCommit(t *testing.T) {
+
+	//given
+	teardown()
+	setupTmpDir()
+
+	// when
+	oid := Commit("tmp", "add something and snapshot it !")
+
+	// then
+	expectedCommitOid := "323460bfcda38ee6c31f2177e99d7bf1717bf60e"
+	assert.Equal(t, expectedCommitOid, oid)
+	assert.FileExists(t, ".ugit/objects/"+expectedCommitOid)
+	assert.FileExists(t, ".ugit/HEAD")
+	h, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, expectedCommitOid, string(h))
+
+	c, _ := ioutil.ReadFile(".ugit/objects/" + expectedCommitOid)
+	lines := strings.Split(string(bytes.Split(c, []byte{BYTE_SEPARATOR})[1]), "\n")
+	assert.Equal(t, "tree 2099e065ed4f38fc997ca05a706ab6ad31663225", lines[0])
+	assert.Equal(t, "parent ", lines[1])
+	assert.Equal(t, "add something and snapshot it !", lines[3])
+
+	teardown()
+}
+
+func TestSetHead(t *testing.T) {
+	// given
+	oid := "123"
+	os.MkdirAll(".ugit/", 0777)
+
+	// when
+	err := SetHead(oid)
+
+	// then
+	assert.Nil(t, err)
+	assert.FileExists(t, ".ugit/HEAD")
+	h, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, "123", string(h))
+	teardown()
+}
+
+func TestGetHead(t *testing.T) {
+	// given
+	os.MkdirAll(".ugit/", 0777)
+	ioutil.WriteFile(".ugit/HEAD", []byte("123"), 0777)
+
+	// when
+	oid := GetHead()
+
+	// then
+	assert.Equal(t, "123", oid)
 	teardown()
 }

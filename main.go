@@ -9,10 +9,11 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	if len(os.Args) < 1 {
 		fmt.Println("Use one of the following commands : init | commit | hash_object")
 		os.Exit(1)
 	}
+
 	switch os.Args[1] {
 	case "init":
 		if len(os.Args) > 2 {
@@ -25,14 +26,17 @@ func main() {
 		os.Exit(0)
 	case "cat":
 		log.Println("cat object file ", os.Args[2])
-		fmt.Println(data.GetObject(os.Args[2]))
+		log.Println(data.GetObject(os.Args[2]))
 		os.Exit(0)
 	case "hash_object":
 		if len(os.Args) > 2 {
 			log.Println("hashing the content", os.Args[2])
-			fmt.Println(data.PutObject(os.Args[2], data.BLOB))
+			log.Println(data.PutObject(os.Args[2], data.BLOB))
 			os.Exit(0)
 		}
+	case "commit":
+		log.Println(data.Commit("./", os.Args[2]))
+		os.Exit(0)
 	default:
 		log.Println("Usage Ugit")
 	}

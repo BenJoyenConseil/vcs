@@ -13,11 +13,9 @@ import (
 type ObjectType string
 
 const (
-	UGIT_DIR       string     = ".ugit"
-	OBJECTS_DIR    string     = ".ugit/objects"
-	BLOB           ObjectType = "blob"
-	TREE           ObjectType = "tree"
-	BYTE_SEPARATOR byte       = '\x00'
+	UGIT_DIR       string = ".ugit"
+	OBJECTS_DIR    string = ".ugit/objects"
+	BYTE_SEPARATOR byte   = '\x00'
 )
 
 func UInit(dir string) {
