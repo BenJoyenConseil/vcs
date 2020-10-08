@@ -50,6 +50,9 @@ func PutObject(data string, objectType ...ObjectType) (oid string, err error) {
 func GetObject(oid string) (string, ObjectType, error) {
 	objectPath := fmt.Sprintf("%s/%s", OBJECTS_DIR, oid)
 	data, err := ioutil.ReadFile(objectPath)
+	if err != nil {
+		return "", ObjectType(""), err
+	}
 	parts := bytes.Split(data, []byte{BYTE_SEPARATOR})
 	_type := ObjectType(parts[0])
 	content := string(parts[1])

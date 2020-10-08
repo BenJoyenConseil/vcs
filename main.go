@@ -37,6 +37,10 @@ func main() {
 	case "commit":
 		log.Println(data.Commit("./", os.Args[2]))
 		os.Exit(0)
+	case "log":
+		gitLog := data.Log()
+		data.PrintLog(gitLog)
+		os.Exit(0)
 	default:
 		log.Println("Usage Ugit")
 	}

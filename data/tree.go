@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,12 @@ var IGNORED_PATH = map[string]struct{}{
 	".ugit":      struct{}{},
 	".git":       struct{}{},
 	".gitignore": struct{}{},
+}
+
+type CommitNode struct {
+	oid     string
+	parent  *CommitNode
+	message string
 }
 
 func IsIgnored(path string) bool {
@@ -110,6 +117,32 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 	return oid
 }
 
+func GetCommit(oid string) (tree string, parent string, message string, err error) {
+	data, t, err := GetObject(oid)
+	if err != nil {
+		return "", "", "", err
+	}
+	if t != COMMIT {
+		return "", "", "", errors.New("The object " + oid + " is not a commit : " + string(t))
+	}
+	commitLines := strings.Split(data, "\n")
+	for i, l := range commitLines {
+		token := strings.Split(l, " ")
+		if i < 2 {
+			_type := ObjectType(token[0])
+			_oid := token[1]
+			if _type == PARENT {
+				parent = _oid
+			} else if _type == TREE {
+				tree = _oid
+			}
+		} else {
+			message += l
+		}
+	}
+	return tree, parent, message, nil
+}
+
 func SetHead(oid string) error {
 	err := ioutil.WriteFile(HEAD, []byte(oid), 0777)
 	return err
@@ -120,4 +153,47 @@ var HEAD = fmt.Sprintf("%s/HEAD", UGIT_DIR)
 func GetHead() (oid string) {
 	d, _ := ioutil.ReadFile(HEAD)
 	return string(d)
+}
+
+func Log() *CommitNode {
+	var currentNode *CommitNode
+	var headNode *CommitNode
+
+	oid := GetHead()
+	_, parent, message, err := GetCommit(oid)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	for oid != "" {
+
+		previous := currentNode
+		currentNode = &CommitNode{
+			message: message,
+			oid:     oid,
+		}
+		if previous != nil {
+			previous.parent = currentNode
+		} else {
+			headNode = currentNode
+		}
+		oid = parent
+		_, parent, message, _ = GetCommit(oid)
+	}
+	return headNode
+}
+
+func PrintLog(commit *CommitNode) {
+	current := commit
+	for current != nil {
+		char := "|"
+		if current.parent == nil {
+			char = " "
+		}
+		log.Println("*", "commit", current.oid)
+		log.Println(char)
+		log.Println(char, "\t", current.message)
+		log.Println(char)
+		current = current.parent
+	}
 }
