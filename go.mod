@@ -1,4 +1,4 @@
-module ugit
+module vcs
 
 go 1.14
 

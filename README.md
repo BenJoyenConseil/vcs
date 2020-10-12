@@ -2,8 +2,11 @@
 Version control system git like
 
 Following the excellent article https://www.leshenko.net/p/ugit/
-with some unit tests
 
+I have done some modifications
+- The `data` module is renammed as the `storage` because it handles every interaction with the filesystem getting and putting objects
+- The `base` module is renammed as the `tree` because it contains the hight level structure of a Tree, based on the `storage` module. 
+- The code is written using TDD approche. You will find unit tests for each exported functions.
 
 ## usage
 
@@ -12,3 +15,12 @@ with some unit tests
 using binaries
   
     vcs  init | commit | log | ...
+
+## install
+
+    # install using go package manager
+    go get github.com/BenJoyenConseil/vcs
+
+    # init to your working directory
+    cd my_project
+    vcs init

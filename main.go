@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"ugit/storage"
-	"ugit/tree"
+	"vcs/storage"
+	"vcs/tree"
 )
 
 func main() {

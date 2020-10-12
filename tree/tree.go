@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
-	"ugit/storage"
+	"vcs/storage"
 )
 
 var IGNORED_PATH = map[string]struct{}{
