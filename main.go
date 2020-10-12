@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"ugit/data"
+	"ugit/storage"
+	"ugit/tree"
 )
 
 func main() {
@@ -18,28 +19,28 @@ func main() {
 	case "init":
 		if len(os.Args) > 2 {
 			path, _ := filepath.Abs(os.Args[2])
-			data.UInit(path)
+			storage.UInit(path)
 		} else {
 			path, _ := os.Getwd()
-			data.UInit(path)
+			storage.UInit(path)
 		}
 		os.Exit(0)
 	case "cat":
 		log.Println("cat object file ", os.Args[2])
-		log.Println(data.GetObject(os.Args[2]))
+		log.Println(storage.GetObject(os.Args[2]))
 		os.Exit(0)
 	case "hash_object":
 		if len(os.Args) > 2 {
 			log.Println("hashing the content", os.Args[2])
-			log.Println(data.PutObject(os.Args[2], data.BLOB))
+			log.Println(storage.PutObject(os.Args[2], storage.BLOB))
 			os.Exit(0)
 		}
 	case "commit":
-		log.Println(data.Commit("./", os.Args[2]))
+		log.Println(tree.Commit("./", os.Args[2]))
 		os.Exit(0)
 	case "log":
-		gitLog := data.Log()
-		data.PrintLog(gitLog)
+		gitLog := tree.Log()
+		tree.PrintLog(gitLog)
 		os.Exit(0)
 	default:
 		log.Println("Usage Ugit")

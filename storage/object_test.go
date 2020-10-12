@@ -1,4 +1,4 @@
-package data
+package storage
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func TestHashObject(t *testing.T) {
 	// given
 
 	// when
-	result := HashObbject([]byte("Hello World"))
+	result := HashObject([]byte("Hello World"))
 
 	// then
 	assert.Equal(t, "0a4d55a8d778e5022fab701977c5d840bbc486d0", string(result))

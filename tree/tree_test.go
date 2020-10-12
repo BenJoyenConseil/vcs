@@ -1,4 +1,4 @@
-package data
+package tree
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"ugit/storage"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -51,9 +52,9 @@ func TestWriteTree(t *testing.T) {
 	assert.FileExists(t, ".ugit/objects/04921f098f08b8146b16bfdf1173a6cc3013332b", "tmp/dogs.txt file does not exists")
 	assert.FileExists(t, ".ugit/objects/7a117da734c7e42e7c5a8839715a5a1220a4504f", "tmp/other/shoes.jpg file does not exists")
 	tmpOtherObj, _ := ioutil.ReadFile(".ugit/objects/2e2df45d8c8bebe3b8945e409f593486ddbc8603")
-	assert.Contains(t, string(tmpOtherObj), string(TREE))
+	assert.Contains(t, string(tmpOtherObj), string(storage.TREE))
 	tmpOtherObj, _ = ioutil.ReadFile(".ugit/objects/2099e065ed4f38fc997ca05a706ab6ad31663225")
-	assert.Contains(t, string(tmpOtherObj), string(TREE))
+	assert.Contains(t, string(tmpOtherObj), string(storage.TREE))
 
 	teardown()
 }
@@ -103,7 +104,7 @@ func TestCommit(t *testing.T) {
 	assert.Equal(t, expectedCommitOid, string(h))
 
 	c, _ := ioutil.ReadFile(".ugit/objects/" + expectedCommitOid)
-	lines := strings.Split(string(bytes.Split(c, []byte{BYTE_SEPARATOR})[1]), "\n")
+	lines := strings.Split(string(bytes.Split(c, []byte{storage.BYTE_SEPARATOR})[1]), "\n")
 	assert.Equal(t, "tree 2099e065ed4f38fc997ca05a706ab6ad31663225", lines[0])
 	assert.Equal(t, "parent ", lines[1])
 	assert.Equal(t, "add something and snapshot it !", lines[3])

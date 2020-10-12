@@ -1,4 +1,4 @@
-package data
+package storage
 
 const (
 	BLOB   ObjectType = "blob"

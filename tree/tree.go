@@ -1,4 +1,4 @@
-package data
+package tree
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"ugit/storage"
 )
 
 var IGNORED_PATH = map[string]struct{}{
@@ -15,12 +16,18 @@ var IGNORED_PATH = map[string]struct{}{
 	".gitignore": struct{}{},
 }
 
+/*
+CommitNode represent a commit's linkedlist
+*/
 type CommitNode struct {
 	oid     string
 	parent  *CommitNode
 	message string
 }
 
+/*
+IsIgnored return true if the path should be ignored by the VCS
+*/
 func IsIgnored(path string) bool {
 	if _, ok := IGNORED_PATH[path]; ok {
 		return true
@@ -28,6 +35,9 @@ func IsIgnored(path string) bool {
 	return false
 }
 
+/*
+WriteTree saves the directory in the content object storage with recursion
+*/
 func WriteTree(directory string) (oid string, err error) {
 	tree := ""
 	var files []os.FileInfo
@@ -42,30 +52,33 @@ func WriteTree(directory string) (oid string, err error) {
 		path := fmt.Sprintf("%s/%s", directory, f.Name())
 		if f.IsDir() {
 			oid, err = WriteTree(path)
-			tree += fmt.Sprintf("%s %s %s\n", TREE, oid, f.Name())
+			tree += fmt.Sprintf("%s %s %s\n", storage.TREE, oid, f.Name())
 		} else {
 			var data []byte
 			if data, err = ioutil.ReadFile(path); err != nil {
 				return "", err
 			}
-			oid, err = PutObject(string(data), BLOB)
-			tree += fmt.Sprintf("%s %s %s\n", BLOB, oid, f.Name())
+			oid, err = storage.PutObject(string(data), storage.BLOB)
+			tree += fmt.Sprintf("%s %s %s\n", storage.BLOB, oid, f.Name())
 		}
 		if err != nil {
 			return "", err
 		}
 	}
-	oid, err = PutObject(tree, TREE)
+	oid, err = storage.PutObject(tree, storage.TREE)
 	return oid, err
 }
 
+/*
+ReadTree restores the tree contents referenced by the oid into the basepath
+*/
 func ReadTree(oid string, basePath ...string) error {
 	path := "."
 	if len(basePath) > 0 {
 		path = basePath[0]
 	}
 	log.Printf("Restoring tree {%s} in location %s", oid, path)
-	data, _, err := GetObject(oid)
+	data, _, err := storage.GetObject(oid)
 	if err != nil {
 		return err
 	}
@@ -75,17 +88,17 @@ func ReadTree(oid string, basePath ...string) error {
 	treeLines := strings.Split(data, "\n")
 	for _, line := range treeLines {
 		lineSplits := strings.Split(line, " ")
-		t := ObjectType(lineSplits[0])
+		t := storage.ObjectType(lineSplits[0])
 		o := lineSplits[1]
 		p := lineSplits[2]
 
-		if t == TREE {
+		if t == storage.TREE {
 			subdir := fmt.Sprintf("%s/%s", path, p)
 			if err := ReadTree(o, subdir); err != nil {
 				return err
 			}
 		} else {
-			d, _, err := GetObject(o)
+			d, _, err := storage.GetObject(o)
 			if err != nil {
 				return err
 			}
@@ -97,6 +110,9 @@ func ReadTree(oid string, basePath ...string) error {
 	return nil
 }
 
+/*
+Commit takes a snapshot of the directory and add message plus metadata
+*/
 func Commit(dir string, message string, metadata ...string) (oid string) {
 	log.Println(dir)
 	oid, err := WriteTree(dir)
@@ -104,11 +120,11 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		log.Println(err)
 		return ""
 	}
-	commit := fmt.Sprintf("%s %s\n", TREE, oid)
-	commit += fmt.Sprintf("%s %s\n", PARENT, GetHead())
+	commit := fmt.Sprintf("%s %s\n", storage.TREE, oid)
+	commit += fmt.Sprintf("%s %s\n", storage.PARENT, GetHead())
 	commit += fmt.Sprintf("\n%s", message)
 
-	oid, err = PutObject(commit, COMMIT)
+	oid, err = storage.PutObject(commit, storage.COMMIT)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -117,23 +133,26 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 	return oid
 }
 
+/*
+GetCommit return the tree oid, its parent's commit oid, and its associated message
+*/
 func GetCommit(oid string) (tree string, parent string, message string, err error) {
-	data, t, err := GetObject(oid)
+	data, t, err := storage.GetObject(oid)
 	if err != nil {
 		return "", "", "", err
 	}
-	if t != COMMIT {
+	if t != storage.COMMIT {
 		return "", "", "", errors.New("The object " + oid + " is not a commit : " + string(t))
 	}
 	commitLines := strings.Split(data, "\n")
 	for i, l := range commitLines {
 		token := strings.Split(l, " ")
 		if i < 2 {
-			_type := ObjectType(token[0])
+			_type := storage.ObjectType(token[0])
 			_oid := token[1]
-			if _type == PARENT {
+			if _type == storage.PARENT {
 				parent = _oid
-			} else if _type == TREE {
+			} else if _type == storage.TREE {
 				tree = _oid
 			}
 		} else {
@@ -143,18 +162,25 @@ func GetCommit(oid string) (tree string, parent string, message string, err erro
 	return tree, parent, message, nil
 }
 
+/*
+SetHead write the oid reference into the HEAD file
+*/
 func SetHead(oid string) error {
-	err := ioutil.WriteFile(HEAD, []byte(oid), 0777)
+	err := ioutil.WriteFile(storage.HEAD_PATH, []byte(oid), 0777)
 	return err
 }
 
-var HEAD = fmt.Sprintf("%s/HEAD", UGIT_DIR)
-
+/*
+GetHead return the oid stored by the HEAD file
+*/
 func GetHead() (oid string) {
-	d, _ := ioutil.ReadFile(HEAD)
+	d, _ := ioutil.ReadFile(storage.HEAD_PATH)
 	return string(d)
 }
 
+/*
+Log iterates over the commits to build a linked list structure starting from the HEAD to the first Commit
+*/
 func Log() *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
@@ -183,6 +209,9 @@ func Log() *CommitNode {
 	return headNode
 }
 
+/*
+PrintLog takes a linked list of commits and prints them
+*/
 func PrintLog(commit *CommitNode) {
 	current := commit
 	for current != nil {
