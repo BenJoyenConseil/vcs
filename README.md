@@ -1,4 +1,6 @@
 # vcs
+![Go](https://github.com/BenJoyenConseil/vcs/workflows/Go/badge.svg)
+
 Version control system git like
 
 Following the excellent article https://www.leshenko.net/p/ugit/
