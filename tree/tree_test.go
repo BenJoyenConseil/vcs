@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"ugit/storage"
+	"vcs/storage"
 
 	"github.com/stretchr/testify/assert"
 )
