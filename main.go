@@ -1,49 +1,63 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"vcs/storage"
 	"vcs/tree"
 )
 
+var commands = map[string]*flag.FlagSet{
+	"commit": flag.NewFlagSet("commit", flag.ExitOnError),
+	"init":   flag.NewFlagSet("init", flag.ExitOnError),
+	"log":    flag.NewFlagSet("log", flag.ExitOnError),
+}
+
+var usage = func() {
+	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+	for k, v := range commands {
+		fmt.Fprintf(os.Stderr, "%s\n", k)
+		v.PrintDefaults()
+	}
+	flag.PrintDefaults()
+}
+
+var commitMessage *string
+
+func init() {
+	commitMessage = commands["commit"].String("m", "", "The message of the commit inside double quotes")
+}
+
 func main() {
-	if len(os.Args) < 1 {
-		fmt.Println("Use one of the following commands : init | commit | hash_object")
+	flag.Usage = usage
+	if len(os.Args) < 2 {
+		flag.Usage()
 		os.Exit(1)
 	}
-
-	switch os.Args[1] {
-	case "init":
-		if len(os.Args) > 2 {
-			path, _ := filepath.Abs(os.Args[2])
-			storage.UInit(path)
-		} else {
-			path, _ := os.Getwd()
-			storage.UInit(path)
-		}
-		os.Exit(0)
-	case "cat":
-		log.Println("cat object file ", os.Args[2])
-		log.Println(storage.GetObject(os.Args[2]))
-		os.Exit(0)
-	case "hash_object":
-		if len(os.Args) > 2 {
-			log.Println("hashing the content", os.Args[2])
-			log.Println(storage.PutObject(os.Args[2], storage.BLOB))
-			os.Exit(0)
-		}
-	case "commit":
-		log.Println(tree.Commit("./", os.Args[2]))
-		os.Exit(0)
-	case "log":
-		gitLog := tree.Log()
-		tree.PrintLog(gitLog)
-		os.Exit(0)
-	default:
-		log.Println("Usage Ugit")
+	if _, ok := commands[os.Args[1]]; !ok {
+		flag.Usage()
+		os.Exit(1)
 	}
-	os.Exit(1)
+	switch os.Args[1] {
+	case "commit":
+		commands["commit"].Parse(os.Args[2:])
+		if *commitMessage != "" {
+			log.Println("Commit hash : ", tree.Commit("./", *commitMessage))
+			return
+		}
+	case "init":
+		path := "./"
+		if len(os.Args) >= 3 {
+			path = os.Args[2]
+		}
+		storage.UInit(path)
+		return
+	case "log":
+		tree.PrintLog(tree.Log())
+		return
+	}
+
+	flag.Usage()
 }

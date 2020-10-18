@@ -219,10 +219,10 @@ func PrintLog(commit *CommitNode) {
 		if current.parent == nil {
 			char = " "
 		}
-		log.Println("*", "commit", current.oid)
-		log.Println(char)
-		log.Println(char, "\t", current.message)
-		log.Println(char)
+		fmt.Println("*", "commit", current.oid)
+		fmt.Println(char)
+		fmt.Println(char, "\t", current.message)
+		fmt.Println(char)
 		current = current.parent
 	}
 }
