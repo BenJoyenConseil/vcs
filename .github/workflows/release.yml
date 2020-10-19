@@ -29,7 +29,7 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-        apt install make
+        sudo apt-get install make
 
     - name: Build
       run: make build
