@@ -1,5 +1,6 @@
 # vcs
 ![Go](https://github.com/BenJoyenConseil/vcs/workflows/Go/badge.svg)
+![Release](https://img.shields.io/github/v/release/BenJoyenConseil/vcs.svg)
 
 Version control system git like
 
