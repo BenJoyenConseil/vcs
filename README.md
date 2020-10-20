@@ -27,3 +27,16 @@ using binaries
     # init to your working directory
     cd my_project
     vcs init
+
+## features
+
+* **commit** -m "add description" : snapshot the current directory and save its version for later
+* **hash_object** : add a new object in the datastore folder ./.ugit/objects/
+* **log** : print the graph of commit log
+* **HEAD** : pointer to the last commit, the current working
+
+### pending
+
+* **checkout** : restore files and folder of specific commited snapshot
+* **tag** : mark and identify a commit with a simplified name (instead of its hash)
+* **branch** : references
