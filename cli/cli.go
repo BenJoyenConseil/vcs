@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"log"
 	"os"
 	"vcs/storage"
 	"vcs/tree"
@@ -21,6 +22,11 @@ var (
 
 	_log      = app.Command("log", "Print the commit log history")
 	logaction = _log.Action(ulog)
+
+	hash_object = app.Command("hash_object", "Save an object in vcs and get its hash")
+	hashString  = hash_object.Arg("content", "The string/binary content of an object (e.g file)").Required().String()
+	hashAction  = hash_object.Action(uhashObject)
+	putAction   = hash_object.Flag("save", "Save into the vcs directory").Short('s').Action(uputObject).Bool()
 )
 
 func Parse(args []string) {
@@ -41,4 +47,18 @@ func uinit(c *kingpin.ParseContext) error {
 func ulog(c *kingpin.ParseContext) error {
 	tree.PrintLog(tree.Log())
 	return nil
+}
+
+func uhashObject(c *kingpin.ParseContext) error {
+	if !*putAction {
+		data := []byte(*hashString)
+		log.Println(string(storage.HashObject(data)))
+	}
+	return nil
+}
+
+func uputObject(c *kingpin.ParseContext) error {
+	oid, err := storage.PutObject(*hashString)
+	log.Println(oid)
+	return err
 }
