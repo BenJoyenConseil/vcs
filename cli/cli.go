@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 	"vcs/storage"
 	"vcs/tree"
@@ -10,12 +9,13 @@ import (
 )
 
 var (
-	app          = kingpin.New("vcs", "Version your directory. period")
-	commit       = app.Command("commit", "snapshot the current directory")
+	app          = kingpin.New("vcs", "Snapshot your working directory")
+	commit       = app.Command("commit", "snapshot the current directory with an explicite message desciption")
 	commitMsg    = commit.Flag("message", "message description").Short('m').Required().String()
+	vcsDir       = commit.Flag("dir", "Force to use a specific vcs directory").Default("./").Short('d').String()
 	commitAction = commit.Action(ucommit)
 
-	_init      = app.Command("init", "Setup directory to be manageed")
+	_init      = app.Command("init", "Setup the directory you want to be managed")
 	initDir    = _init.Arg("dir", "The directory to setup VCS").Default("./").String()
 	initAction = _init.Action(uinit)
 
@@ -23,14 +23,13 @@ var (
 	logaction = _log.Action(ulog)
 )
 
-func Init(args []string) {
+func Parse(args []string) {
 	kingpin.MustParse(app.Parse(os.Args[1:]))
-	fmt.Println(*commitMsg, *initDir)
 
 }
 
 func ucommit(c *kingpin.ParseContext) error {
-	tree.Commit("./", *commitMsg)
+	tree.Commit(*vcsDir, *commitMsg)
 	return nil
 }
 

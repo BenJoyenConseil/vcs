@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	cli.Init(os.Args)
+	cli.Parse(os.Args)
 }
