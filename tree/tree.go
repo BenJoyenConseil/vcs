@@ -78,9 +78,12 @@ func ReadTree(oid string, basePath ...string) error {
 		path = basePath[0]
 	}
 	log.Printf("Restoring tree {%s} in location %s", oid, path)
-	data, _, err := storage.GetObject(oid)
+	data, _type, err := storage.GetObject(oid)
 	if err != nil {
 		return err
+	}
+	if _type != storage.TREE {
+		return errors.New("This oid point to a non tree object : " + string(_type))
 	}
 	os.RemoveAll(path)
 	os.Mkdir(path, 0777)

@@ -90,6 +90,18 @@ func TestReadTree(t *testing.T) {
 	teardown()
 }
 
+func TestReadTree_ShouldErrorIfObjectNotATree(t *testing.T) {
+	// given
+	setupUgitDir()
+	oidCommitMoveAgain := "cdf776713053cc0710735a61dfbe6492f3ed31b2"
+
+	// when
+	err := ReadTree(oidCommitMoveAgain, "tmp")
+
+	// then
+	assert.NotNil(t, err)
+}
+
 func TestCommit(t *testing.T) {
 
 	//given
