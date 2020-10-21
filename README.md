@@ -34,6 +34,6 @@ using binaries
 - [x] **hash_object** : add a new object in the datastore folder ./.ugit/objects/
 - [x] **log** : print the graph of commit log
 - [x] **HEAD** : pointer to the last commit, the current working
-- [ ] **checkout** : restore files and folder of specific commited snapshot
+- [x] **checkout** : restore files and folder of specific commited snapshot
 - [ ] **tag** : mark and identify a commit with a simplified name (instead of its hash)
 - [ ] **branch** : references
