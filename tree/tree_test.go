@@ -63,6 +63,14 @@ func TestWriteTree(t *testing.T) {
 
 	teardown()
 }
+func TestIsIgnored(t *testing.T) {
+	// then
+	assert.True(t, IsIgnored("/.ugit"))
+	assert.True(t, IsIgnored("/.git"))
+	assert.True(t, IsIgnored("tmp/.git"))
+	assert.True(t, IsIgnored("/home/lalaland/.local/.git/HEAD"))
+	assert.False(t, IsIgnored("/home/lalaland/.local/yo"))
+}
 
 func TestReadTree(t *testing.T) {
 
@@ -100,6 +108,25 @@ func TestReadTree_ShouldErrorIfObjectNotATree(t *testing.T) {
 
 	// then
 	assert.NotNil(t, err)
+}
+
+func TestReadTree_ShouldNotRemoveIgnoredPath(t *testing.T) {
+	// given
+	setupUgitDir()
+	setupTmpDir()
+	ioutil.WriteFile("tmp/.gitignore", []byte(""), 0777)
+	os.MkdirAll("tmp/.git", 0777)
+	os.MkdirAll("tmp/.ugit", 0777)
+	oidCommitMoveAgain := "cdf776713053cc0710735a61dfbe6492f3ed31b2"
+
+	// when
+	ReadTree(oidCommitMoveAgain, "tmp")
+
+	// then
+	assert.FileExists(t, "tmp/.gitignore")
+	assert.DirExists(t, "tmp/.ugit")
+	assert.DirExists(t, "tmp/.git")
+	//teardown()
 }
 
 func TestCommit(t *testing.T) {

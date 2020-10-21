@@ -10,10 +10,10 @@ import (
 	"vcs/storage"
 )
 
-var IGNORED_PATH = map[string]struct{}{
-	".ugit":      struct{}{},
-	".git":       struct{}{},
-	".gitignore": struct{}{},
+var IGNORED_PATH = []string{
+	".ugit",
+	".git",
+	".gitignore",
 }
 
 /*
@@ -29,8 +29,10 @@ type CommitNode struct {
 IsIgnored return true if the path should be ignored by the VCS
 */
 func IsIgnored(path string) bool {
-	if _, ok := IGNORED_PATH[path]; ok {
-		return true
+	for _, ignore := range IGNORED_PATH {
+		if strings.Contains(path, ignore) {
+			return true
+		}
 	}
 	return false
 }
@@ -85,7 +87,9 @@ func ReadTree(oid string, basePath ...string) error {
 	if _type != storage.TREE {
 		return errors.New("This oid point to a non tree object : " + string(_type))
 	}
-	os.RemoveAll(path)
+	if !IsIgnored(path) {
+		log.Println("Remove : ", path, os.RemoveAll(path))
+	}
 	os.Mkdir(path, 0777)
 
 	treeLines := strings.Split(data, "\n")
