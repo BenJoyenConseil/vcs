@@ -87,6 +87,7 @@ func ReadTree(oid string, basePath ...string) error {
 
 	treeLines := strings.Split(data, "\n")
 	for _, line := range treeLines {
+		log.Println(line)
 		lineSplits := strings.Split(line, " ")
 		t := storage.ObjectType(lineSplits[0])
 		o := lineSplits[1]
@@ -225,4 +226,17 @@ func PrintLog(commit *CommitNode) {
 		fmt.Println(char)
 		current = current.parent
 	}
+}
+
+/*
+Checkout  moves HEAD to a commit oid and restore its state (e.g files and folders)
+*/
+func Checkout(oid string, basePath ...string) error {
+	SetHead(oid)
+	head := GetHead()
+	tree, _, _, err := GetCommit(head)
+	if err != nil {
+		return err
+	}
+	return ReadTree(tree, basePath...)
 }

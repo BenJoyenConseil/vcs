@@ -27,6 +27,11 @@ var (
 	hashString  = hash_object.Arg("content", "The string/binary content of an object (e.g file)").Required().String()
 	hashAction  = hash_object.Action(uhashObject)
 	putAction   = hash_object.Flag("save", "Save into the vcs directory").Short('s').Action(uputObject).Bool()
+
+	checkout       = app.Command("checkout", "Restore files and folders from a committed snapshot")
+	oidCheckout    = checkout.Arg("oid", "The commit oid").Required().String()
+	checkoutAction = checkout.Action(ucheckout)
+	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default("./").Short('d').String()
 )
 
 func Parse(args []string) {
@@ -60,5 +65,10 @@ func uhashObject(c *kingpin.ParseContext) error {
 func uputObject(c *kingpin.ParseContext) error {
 	oid, err := storage.PutObject(*hashString)
 	log.Println(oid)
+	return err
+}
+
+func ucheckout(c *kingpin.ParseContext) error {
+	err := tree.Checkout(*oidCheckout, *checkoutDir)
 	return err
 }

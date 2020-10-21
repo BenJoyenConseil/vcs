@@ -31,6 +31,11 @@ func setupUgitDir() {
 	ioutil.WriteFile(".ugit/HEAD", []byte("cdf776713053cc0710735a61dfbe6492f3ed31b2"), 0777)
 }
 
+func removeDogsAndCommit() {
+	ioutil.WriteFile(".ugit/objects/751eb07c9a747033c359510dd71c8dd045a9cfc1", []byte("tree"+string('\000')+"blob 429d2f37997444b85323305c5e02c4233a04158e cats.txt\ntree 2e2df45d8c8bebe3b8945e409f593486ddbc8603 other"), 0777)
+	ioutil.WriteFile(".ugit/objects/f37333b2d9ffbbf083b6c364a02cc555fa56ffef", []byte("commit"+string('\000')+"tree 751eb07c9a747033c359510dd71c8dd045a9cfc1\nparent cdf776713053cc0710735a61dfbe6492f3ed31b2\n\nremove dogs.txt"), 0777)
+}
+
 func teardown() {
 	os.RemoveAll("tmp")
 	os.RemoveAll(".ugit")
@@ -64,7 +69,6 @@ func TestReadTree(t *testing.T) {
 	// given
 	oid := "2099e065ed4f38fc997ca05a706ab6ad31663225"
 	setupUgitDir()
-	setupTmpDir()
 
 	// // when
 	err := ReadTree(oid, "tmp")
@@ -176,5 +180,27 @@ func TestLog(t *testing.T) {
 	assert.Contains(t, commitLog.parent.parent.oid, "323460bfcda38ee6c31f2177e99d7bf1717bf60e")
 	assert.Equal(t, commitLog.parent.parent.message, "add something and snapshot it !")
 
+	teardown()
+}
+
+func TestCheckout(t *testing.T) {
+	// given
+	setupTmpDir()
+	setupUgitDir()
+	removeDogsAndCommit()
+	oid := "f37333b2d9ffbbf083b6c364a02cc555fa56ffef"
+
+	// when
+	err := Checkout(oid, "tmp")
+
+	// then
+	assert.Nil(t, err)
+	assert.DirExists(t, "tmp")
+	assert.FileExists(t, "tmp/cats.txt")
+	assert.DirExists(t, "tmp/other")
+	assert.FileExists(t, "tmp/other/shoes.jpg")
+	assert.NoFileExists(t, "tmp/dogs.txt")
+	h, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, "f37333b2d9ffbbf083b6c364a02cc555fa56ffef", string(h))
 	teardown()
 }
