@@ -10,14 +10,6 @@ import (
 	"path/filepath"
 )
 
-type ObjectType string
-
-const (
-	UGIT_DIR       string = ".ugit"
-	OBJECTS_DIR    string = ".ugit/objects"
-	HEAD_PATH      string = ".ugit/HEAD"
-	BYTE_SEPARATOR byte   = '\x00'
-)
 
 func UInit(dir string) {
 	initDir, _ := filepath.Abs(fmt.Sprintf("%s/%s", dir, UGIT_DIR))

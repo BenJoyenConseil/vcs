@@ -132,7 +132,7 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		return ""
 	}
 	commit := fmt.Sprintf("%s %s\n", storage.TREE, oid)
-	commit += fmt.Sprintf("%s %s\n", storage.PARENT, GetHead())
+	commit += fmt.Sprintf("%s %s\n", storage.PARENT, storage.GetHead())
 	commit += fmt.Sprintf("\n%s", message)
 
 	oid, err = storage.PutObject(commit, storage.COMMIT)
@@ -140,7 +140,7 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		log.Println(err)
 		return ""
 	}
-	SetHead(oid)
+	storage.SetHead(oid)
 	return oid
 }
 
@@ -174,29 +174,13 @@ func GetCommit(oid string) (tree string, parent string, message string, err erro
 }
 
 /*
-SetHead write the oid reference into the HEAD file
-*/
-func SetHead(oid string) error {
-	err := ioutil.WriteFile(storage.HEAD_PATH, []byte(oid), 0777)
-	return err
-}
-
-/*
-GetHead return the oid stored by the HEAD file
-*/
-func GetHead() (oid string) {
-	d, _ := ioutil.ReadFile(storage.HEAD_PATH)
-	return string(d)
-}
-
-/*
 Log iterates over the commits to build a linked list structure starting from the HEAD to the first Commit
 */
 func Log() *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
 
-	oid := GetHead()
+	oid := storage.GetHead()
 	_, parent, message, err := GetCommit(oid)
 	if err != nil {
 		log.Println(err)
@@ -242,8 +226,8 @@ func PrintLog(commit *CommitNode) {
 Checkout  moves HEAD to a commit oid and restore its state (e.g files and folders)
 */
 func Checkout(oid string, basePath ...string) error {
-	SetHead(oid)
-	head := GetHead()
+	storage.SetHead(oid)
+	head := storage.GetHead()
 	tree, _, _, err := GetCommit(head)
 	if err != nil {
 		return err

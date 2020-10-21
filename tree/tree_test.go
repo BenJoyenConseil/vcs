@@ -6,44 +6,15 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"vcs/mock"
 	"vcs/storage"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTmpDir() {
-	os.MkdirAll("tmp/other", 0777)
-	ioutil.WriteFile("tmp/cats.txt", []byte("Hello"), 0777)
-	ioutil.WriteFile("tmp/dogs.txt", []byte("World"), 0777)
-	ioutil.WriteFile("tmp/other/shoes.jpg", []byte("qui mange un saucisson"), 0777)
-}
-
-func setupUgitDir() {
-	os.MkdirAll(".ugit/objects", 0777)
-	ioutil.WriteFile(".ugit/objects/429d2f37997444b85323305c5e02c4233a04158e", []byte("blob"+string('\000')+"Hello"), 0777)
-	ioutil.WriteFile(".ugit/objects/04921f098f08b8146b16bfdf1173a6cc3013332b", []byte("blob"+string('\000')+"World"), 0777)
-	ioutil.WriteFile(".ugit/objects/7a117da734c7e42e7c5a8839715a5a1220a4504f", []byte("blob"+string('\000')+"qui mange un saucisson"), 0777)
-	ioutil.WriteFile(".ugit/objects/2099e065ed4f38fc997ca05a706ab6ad31663225", []byte("tree"+string('\000')+"blob 429d2f37997444b85323305c5e02c4233a04158e cats.txt\nblob 04921f098f08b8146b16bfdf1173a6cc3013332b dogs.txt\ntree 2e2df45d8c8bebe3b8945e409f593486ddbc8603 other"), 0777)
-	ioutil.WriteFile(".ugit/objects/2e2df45d8c8bebe3b8945e409f593486ddbc8603", []byte("tree"+string('\000')+"blob 7a117da734c7e42e7c5a8839715a5a1220a4504f shoes.jpg"), 0777)
-	ioutil.WriteFile(".ugit/objects/323460bfcda38ee6c31f2177e99d7bf1717bf60e", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent \n\nadd something and snapshot it !"), 0777)
-	ioutil.WriteFile(".ugit/objects/93584d4997160f16e3ac4390ec4008a2d2ff32d6", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent 323460bfcda38ee6c31f2177e99d7bf1717bf60e\n\nmove you HEAD !"), 0777)
-	ioutil.WriteFile(".ugit/objects/cdf776713053cc0710735a61dfbe6492f3ed31b2", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent 93584d4997160f16e3ac4390ec4008a2d2ff32d6\n\nand move again !"), 0777)
-	ioutil.WriteFile(".ugit/HEAD", []byte("cdf776713053cc0710735a61dfbe6492f3ed31b2"), 0777)
-}
-
-func removeDogsAndCommit() {
-	ioutil.WriteFile(".ugit/objects/751eb07c9a747033c359510dd71c8dd045a9cfc1", []byte("tree"+string('\000')+"blob 429d2f37997444b85323305c5e02c4233a04158e cats.txt\ntree 2e2df45d8c8bebe3b8945e409f593486ddbc8603 other"), 0777)
-	ioutil.WriteFile(".ugit/objects/f37333b2d9ffbbf083b6c364a02cc555fa56ffef", []byte("commit"+string('\000')+"tree 751eb07c9a747033c359510dd71c8dd045a9cfc1\nparent cdf776713053cc0710735a61dfbe6492f3ed31b2\n\nremove dogs.txt"), 0777)
-}
-
-func teardown() {
-	os.RemoveAll("tmp")
-	os.RemoveAll(".ugit")
-}
-
 func TestWriteTree(t *testing.T) {
 	// given
-	setupTmpDir()
+	mock.SetupTmpDir()
 
 	// when
 	oid, err := WriteTree("./tmp")
@@ -61,7 +32,7 @@ func TestWriteTree(t *testing.T) {
 	tmpOtherObj, _ = ioutil.ReadFile(".ugit/objects/2099e065ed4f38fc997ca05a706ab6ad31663225")
 	assert.Contains(t, string(tmpOtherObj), string(storage.TREE))
 
-	teardown()
+	mock.Teardown()
 }
 func TestIsIgnored(t *testing.T) {
 	// then
@@ -76,7 +47,7 @@ func TestReadTree(t *testing.T) {
 
 	// given
 	oid := "2099e065ed4f38fc997ca05a706ab6ad31663225"
-	setupUgitDir()
+	mock.SetupUgitDir()
 
 	// // when
 	err := ReadTree(oid, "tmp")
@@ -95,12 +66,12 @@ func TestReadTree(t *testing.T) {
 	assert.Equal(t, "Hello", string(d))
 	d, _ = ioutil.ReadFile("tmp/dogs.txt")
 	assert.Equal(t, "World", string(d))
-	teardown()
+	mock.Teardown()
 }
 
 func TestReadTree_ShouldErrorIfObjectNotATree(t *testing.T) {
 	// given
-	setupUgitDir()
+	mock.SetupUgitDir()
 	oidCommitMoveAgain := "cdf776713053cc0710735a61dfbe6492f3ed31b2"
 
 	// when
@@ -108,12 +79,13 @@ func TestReadTree_ShouldErrorIfObjectNotATree(t *testing.T) {
 
 	// then
 	assert.NotNil(t, err)
+	mock.Teardown()
 }
 
 func TestReadTree_ShouldNotRemoveIgnoredPath(t *testing.T) {
 	// given
-	setupUgitDir()
-	setupTmpDir()
+	mock.SetupUgitDir()
+	mock.SetupTmpDir()
 	ioutil.WriteFile("tmp/.gitignore", []byte(""), 0777)
 	os.MkdirAll("tmp/.git", 0777)
 	os.MkdirAll("tmp/.ugit", 0777)
@@ -126,14 +98,13 @@ func TestReadTree_ShouldNotRemoveIgnoredPath(t *testing.T) {
 	assert.FileExists(t, "tmp/.gitignore")
 	assert.DirExists(t, "tmp/.ugit")
 	assert.DirExists(t, "tmp/.git")
-	//teardown()
+	mock.Teardown()
 }
 
 func TestCommit(t *testing.T) {
 
 	//given
-	teardown()
-	setupTmpDir()
+	mock.SetupTmpDir()
 
 	// when
 	oid := Commit("tmp", "add something and snapshot it !")
@@ -152,13 +123,13 @@ func TestCommit(t *testing.T) {
 	assert.Equal(t, "parent ", lines[1])
 	assert.Equal(t, "add something and snapshot it !", lines[3])
 
-	teardown()
+	mock.Teardown()
 }
 
 func TestGetCommit(t *testing.T) {
 
 	// given
-	setupUgitDir()
+	mock.SetupUgitDir()
 	oid := "93584d4997160f16e3ac4390ec4008a2d2ff32d6"
 
 	// when
@@ -171,40 +142,12 @@ func TestGetCommit(t *testing.T) {
 	assert.Equal(t, "323460bfcda38ee6c31f2177e99d7bf1717bf60e", parent)
 	assert.Equal(t, "move you HEAD !", message)
 	assert.Nil(t, err)
-}
-
-func TestSetHead(t *testing.T) {
-	// given
-	oid := "123"
-	os.MkdirAll(".ugit/", 0777)
-
-	// when
-	err := SetHead(oid)
-
-	// then
-	assert.Nil(t, err)
-	assert.FileExists(t, ".ugit/HEAD")
-	h, _ := ioutil.ReadFile(".ugit/HEAD")
-	assert.Equal(t, "123", string(h))
-	teardown()
-}
-
-func TestGetHead(t *testing.T) {
-	// given
-	os.MkdirAll(".ugit/", 0777)
-	ioutil.WriteFile(".ugit/HEAD", []byte("123"), 0777)
-
-	// when
-	oid := GetHead()
-
-	// then
-	assert.Equal(t, "123", oid)
-	teardown()
+	mock.Teardown()
 }
 
 func TestLog(t *testing.T) {
 	// given
-	setupUgitDir()
+	mock.SetupUgitDir()
 
 	// when
 	commitLog := Log()
@@ -219,14 +162,14 @@ func TestLog(t *testing.T) {
 	assert.Contains(t, commitLog.parent.parent.oid, "323460bfcda38ee6c31f2177e99d7bf1717bf60e")
 	assert.Equal(t, commitLog.parent.parent.message, "add something and snapshot it !")
 
-	teardown()
+	mock.Teardown()
 }
 
 func TestCheckout(t *testing.T) {
 	// given
-	setupTmpDir()
-	setupUgitDir()
-	removeDogsAndCommit()
+	mock.SetupTmpDir()
+	mock.SetupUgitDir()
+	mock.RemoveDogsAndCommit()
 	oid := "f37333b2d9ffbbf083b6c364a02cc555fa56ffef"
 
 	// when
@@ -241,5 +184,5 @@ func TestCheckout(t *testing.T) {
 	assert.NoFileExists(t, "tmp/dogs.txt")
 	h, _ := ioutil.ReadFile(".ugit/HEAD")
 	assert.Equal(t, "f37333b2d9ffbbf083b6c364a02cc555fa56ffef", string(h))
-	teardown()
+	mock.Teardown()
 }
