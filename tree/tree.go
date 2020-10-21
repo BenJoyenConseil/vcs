@@ -176,7 +176,7 @@ func GetCommit(oid string) (tree string, parent string, message string, err erro
 /*
 Log iterates over the commits to build a linked list structure starting from the HEAD to the first Commit
 */
-func Log() *CommitNode {
+func Log(ref ...string) *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
 
@@ -233,4 +233,13 @@ func Checkout(oid string, basePath ...string) error {
 		return err
 	}
 	return ReadTree(tree, basePath...)
+}
+
+func GetOid(ref string) (oid string) {
+	tag := storage.GetTag(ref)
+	if tag != "" {
+		return tag
+	}
+
+	return ref
 }

@@ -22,6 +22,7 @@ var (
 
 	_log      = app.Command("log", "Print the commit log history")
 	logaction = _log.Action(ulog)
+	logRef    = _log.Arg("ref", "A reference as the starting point in the history").Default("HEAD").String()
 
 	hash_object = app.Command("hash_object", "Save an object in vcs and get its hash")
 	hashString  = hash_object.Arg("content", "The string/binary content of an object (e.g file)").Required().String()
@@ -32,6 +33,10 @@ var (
 	oidCheckout    = checkout.Arg("oid", "The commit oid").Required().String()
 	checkoutAction = checkout.Action(ucheckout)
 	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default(".").Short('d').String()
+
+	tag       = app.Command("tag", "Give a name to the current commit")
+	tagAction = tag.Action(utag)
+	tagName   = tag.Arg("name", "Usefull name to find a commit oid").Required().String()
 )
 
 func Parse(args []string) {
@@ -70,5 +75,10 @@ func uputObject(c *kingpin.ParseContext) error {
 
 func ucheckout(c *kingpin.ParseContext) error {
 	err := tree.Checkout(*oidCheckout, *checkoutDir)
+	return err
+}
+
+func utag(c *kingpin.ParseContext) error {
+	err := storage.SetTag(*tagName, storage.GetHead())
 	return err
 }

@@ -186,3 +186,14 @@ func TestCheckout(t *testing.T) {
 	assert.Equal(t, "f37333b2d9ffbbf083b6c364a02cc555fa56ffef", string(h))
 	mock.Teardown()
 }
+
+func TestGetOid(t *testing.T) {
+	os.MkdirAll(".ugit/refs/tags", 0777)
+	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
+
+	// when
+	oid := GetOid("v0.1.0")
+
+	// then
+	assert.Equal(t, "123", oid)
+}

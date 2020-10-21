@@ -13,5 +13,7 @@ const (
 	UGIT_DIR       string = ".ugit"
 	OBJECTS_DIR    string = ".ugit/objects"
 	HEAD_PATH      string = ".ugit/HEAD"
+	REF_DIR        string = ".ugit/refs"
+	TAG_DIR        string = ".ugit/refs/tags"
 	BYTE_SEPARATOR byte   = '\x00'
 )
