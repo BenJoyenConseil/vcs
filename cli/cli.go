@@ -13,11 +13,11 @@ var (
 	app          = kingpin.New("vcs", "Snapshot your working directory")
 	commit       = app.Command("commit", "snapshot the current directory with an explicite message desciption")
 	commitMsg    = commit.Flag("message", "message description").Short('m').Required().String()
-	vcsDir       = commit.Flag("dir", "Force to use a specific vcs directory").Default("./").Short('d').String()
+	vcsDir       = commit.Flag("dir", "Force to use a specific vcs directory").Default(".").Short('d').String()
 	commitAction = commit.Action(ucommit)
 
 	_init      = app.Command("init", "Setup the directory you want to be managed")
-	initDir    = _init.Arg("dir", "The directory to setup VCS").Default("./").String()
+	initDir    = _init.Arg("dir", "The directory to setup VCS").Default(".").String()
 	initAction = _init.Action(uinit)
 
 	_log      = app.Command("log", "Print the commit log history")
@@ -31,7 +31,7 @@ var (
 	checkout       = app.Command("checkout", "Restore files and folders from a committed snapshot")
 	oidCheckout    = checkout.Arg("oid", "The commit oid").Required().String()
 	checkoutAction = checkout.Action(ucheckout)
-	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default("./").Short('d').String()
+	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default(".").Short('d').String()
 )
 
 func Parse(args []string) {

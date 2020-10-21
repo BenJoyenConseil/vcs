@@ -14,6 +14,7 @@ var IGNORED_PATH = []string{
 	".ugit",
 	".git",
 	".gitignore",
+	"./",
 }
 
 /*
@@ -94,8 +95,10 @@ func ReadTree(oid string, basePath ...string) error {
 
 	treeLines := strings.Split(data, "\n")
 	for _, line := range treeLines {
-		log.Println(line)
 		lineSplits := strings.Split(line, " ")
+		if len(lineSplits) != 3 {
+			continue
+		}
 		t := storage.ObjectType(lineSplits[0])
 		o := lineSplits[1]
 		p := lineSplits[2]
