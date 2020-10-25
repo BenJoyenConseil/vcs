@@ -11,12 +11,20 @@ import (
 
 func TestUInit(t *testing.T) {
 	// given
-	dir := "/tmp/"
+	dir := "./"
+
 	// when
 	UInit(dir)
 
 	// then
-	assert.DirExists(t, "/tmp/.ugit")
+	assert.DirExists(t, ".ugit")
+	assert.FileExists(t, ".ugit/HEAD")
+	d, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, "refs/heads/master", string(d))
+	assert.DirExists(t, ".ugit/refs/heads/")
+	assert.FileExists(t, ".ugit/refs/heads/master")
+	d, _ = ioutil.ReadFile(".ugit/refs/heads/master")
+	assert.Equal(t, "", string(d))
 }
 
 func TestHashObject(t *testing.T) {

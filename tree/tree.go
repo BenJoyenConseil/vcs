@@ -189,7 +189,8 @@ func Log(ref ...string) *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
 
-	oid, err := storage.GetHead()
+	r, err := storage.GetHead()
+	oid := GetOid(r)
 	if err != nil {
 		log.Println(err)
 		return nil

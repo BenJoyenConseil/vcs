@@ -22,7 +22,9 @@ func SetupUgitDir() {
 	ioutil.WriteFile(".ugit/objects/323460bfcda38ee6c31f2177e99d7bf1717bf60e", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent \n\nadd something and snapshot it !"), 0777)
 	ioutil.WriteFile(".ugit/objects/93584d4997160f16e3ac4390ec4008a2d2ff32d6", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent 323460bfcda38ee6c31f2177e99d7bf1717bf60e\n\nmove you HEAD !"), 0777)
 	ioutil.WriteFile(".ugit/objects/cdf776713053cc0710735a61dfbe6492f3ed31b2", []byte("commit"+string('\000')+"tree 2099e065ed4f38fc997ca05a706ab6ad31663225\nparent 93584d4997160f16e3ac4390ec4008a2d2ff32d6\n\nand move again !"), 0777)
-	ioutil.WriteFile(".ugit/HEAD", []byte("cdf776713053cc0710735a61dfbe6492f3ed31b2"), 0777)
+	os.MkdirAll(".ugit/refs/heads", 0777)
+	ioutil.WriteFile(".ugit/refs/heads/master", []byte("cdf776713053cc0710735a61dfbe6492f3ed31b2"), 0777)
+	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/master"), 0777)
 }
 
 func RemoveDogsAndCommit() {

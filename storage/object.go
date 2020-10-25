@@ -10,14 +10,19 @@ import (
 	"path/filepath"
 )
 
-
 func UInit(dir string) {
 	initDir, _ := filepath.Abs(fmt.Sprintf("%s/%s", dir, UGIT_DIR))
 	log.Printf("Initialize uGit in the following directory : %s", initDir)
-	err := os.MkdirAll(initDir, 0777)
-	if err != nil {
-		log.Println(err)
-	}
+	os.MkdirAll(initDir, 0777)
+
+	headP, _ := filepath.Abs(fmt.Sprintf("%s/%s/HEAD", dir, UGIT_DIR))
+	ioutil.WriteFile(headP, []byte("refs/heads/master"), 0777)
+
+	branchesP, _ := filepath.Abs(fmt.Sprintf("%s/%s", dir, BRANCH_DIR))
+	os.MkdirAll(branchesP, 0777)
+
+	masterP, _ := filepath.Abs(fmt.Sprintf("%s/%s/master", dir, BRANCH_DIR))
+	ioutil.WriteFile(masterP, nil, 0777)
 }
 
 /*
