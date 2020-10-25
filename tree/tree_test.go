@@ -105,6 +105,9 @@ func TestCommit(t *testing.T) {
 
 	//given
 	mock.SetupTmpDir()
+	os.MkdirAll(".ugit/refs/heads", 0777)
+	ioutil.WriteFile(".ugit/refs/heads/master", nil, 0777)
+	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/master"), 0777)
 
 	// when
 	oid := Commit("tmp", "add something and snapshot it !")
@@ -113,8 +116,8 @@ func TestCommit(t *testing.T) {
 	expectedCommitOid := "323460bfcda38ee6c31f2177e99d7bf1717bf60e"
 	assert.Equal(t, expectedCommitOid, oid)
 	assert.FileExists(t, ".ugit/objects/"+expectedCommitOid)
-	assert.FileExists(t, ".ugit/HEAD")
-	h, _ := ioutil.ReadFile(".ugit/HEAD")
+
+	h, _ := ioutil.ReadFile(".ugit/refs/heads/master")
 	assert.Equal(t, expectedCommitOid, string(h))
 
 	c, _ := ioutil.ReadFile(".ugit/objects/" + expectedCommitOid)

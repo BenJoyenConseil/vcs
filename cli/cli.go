@@ -79,6 +79,11 @@ func ucheckout(c *kingpin.ParseContext) error {
 }
 
 func utag(c *kingpin.ParseContext) error {
-	err := storage.SetTag(*tagName, storage.GetHead())
+	ref, err := storage.GetHead()
+	if err != nil {
+		return nil
+	}
+	oid := tree.GetOid(ref)
+	err = storage.SetTag(*tagName, oid)
 	return err
 }

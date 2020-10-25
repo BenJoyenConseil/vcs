@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 )
@@ -18,7 +17,6 @@ func setRef(ref string, refPath string, oid string, override bool, create bool) 
 	} else {
 		p = fmt.Sprintf("%s/%s", refPath, ref)
 	}
-	log.Println(ref, refPath, p, oid, override)
 	if _, notExists := os.Stat(p); notExists == nil && !override {
 		return fmt.Errorf("The reference %s already exists and override is not allowed", ref)
 	}
@@ -56,32 +54,34 @@ func SetTag(tag string, oid string) error {
 /*
 GetTag return the oid stored by the tag's file
 */
-func GetTag(tag string) (oid string) {
-	oid, _ = getRef(tag, TAG_DIR)
-	return oid
+func GetTag(tag string) (oid string, err error) {
+	oid, err = getRef(tag, TAG_DIR)
+	return oid, err
 }
 
 /*
 SetHead write a reference to the HEAD file
 */
-func SetHead(ref string) {
-	setRef("HEAD", HEAD_PATH, ref, true, true)
+func SetHead(ref string) error {
+	err := ioutil.WriteFile(HEAD_PATH, []byte(ref), 0777)
+	return err
 }
 
 /*
 GetHead return a reference the HEAD file
 */
-func GetHead() (ref string) {
-	ref, _ = getRef("HEAD", HEAD_PATH)
-	return ref
+func GetHead() (ref string, err error) {
+	d, err := ioutil.ReadFile(HEAD_PATH)
+	ref = string(d)
+	return ref, err
 }
 
 /*
 GetBranch return the oid pointed by the refs/heads/ref file
 */
-func GetBranch(ref string) (oid string) {
-	oid, _ = getRef(ref, BRANCH_DIR)
-	return oid
+func GetBranch(ref string) (oid string, err error) {
+	oid, err = getRef(ref, BRANCH_DIR)
+	return oid, err
 }
 
 /*

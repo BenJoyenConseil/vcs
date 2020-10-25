@@ -125,14 +125,22 @@ func ReadTree(oid string, basePath ...string) error {
 Commit takes a snapshot of the directory and add message plus metadata
 */
 func Commit(dir string, message string, metadata ...string) (oid string) {
-	log.Println(dir)
+	log.Println("Snapshoting the following directory : ", dir)
 	oid, err := WriteTree(dir)
 	if err != nil {
 		log.Println(err)
 		return ""
 	}
+
+	ref, err := storage.GetHead()
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	oidParent := GetOid(ref)
 	commit := fmt.Sprintf("%s %s\n", storage.TREE, oid)
-	commit += fmt.Sprintf("%s %s\n", storage.PARENT, storage.GetHead())
+	commit += fmt.Sprintf("%s %s\n", storage.PARENT, oidParent)
 	commit += fmt.Sprintf("\n%s", message)
 
 	oid, err = storage.PutObject(commit, storage.COMMIT)
@@ -140,7 +148,8 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		log.Println(err)
 		return ""
 	}
-	storage.SetHead(oid)
+
+	storage.SetBranch(ref, oid)
 	return oid
 }
 
@@ -180,7 +189,12 @@ func Log(ref ...string) *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
 
-	oid := storage.GetHead()
+	oid, err := storage.GetHead()
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
 	_, parent, message, err := GetCommit(oid)
 	if err != nil {
 		log.Println(err)
@@ -239,11 +253,11 @@ func Checkout(ref string, basePath ...string) error {
 GetOid find the oid of a commit, a reference, or a tag
 */
 func GetOid(ref string) (oid string) {
-	if oid = storage.GetTag(ref); oid != "" {
+	if oid, err := storage.GetTag(ref); err == nil {
 		return oid
-	} else if oid = storage.GetBranch(ref); oid != "" {
-		return oid
-	} else {
-		return ref
 	}
+	if oid, err := storage.GetBranch(ref); err == nil {
+		return oid
+	}
+	return ref
 }

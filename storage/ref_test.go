@@ -30,10 +30,14 @@ func TestGetHead(t *testing.T) {
 	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/master"), 0777)
 
 	// when
-	oid := GetHead()
+	oid, err := GetHead()
+	os.Remove(".ugit/HEAD")
+	_, err2 := GetHead()
 
 	// then
 	assert.Equal(t, "refs/heads/master", oid)
+	assert.Nil(t, err)
+	assert.NotNil(t, err2)
 	mock.Teardown()
 }
 
@@ -67,8 +71,8 @@ func TestGetTag(t *testing.T) {
 	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
 
 	// when
-	oid := GetTag("v0.1.0")
-	oid2 := GetTag("refs/tags/v0.1.0")
+	oid, _ := GetTag("v0.1.0")
+	oid2, _ := GetTag("refs/tags/v0.1.0")
 
 	// then
 	assert.Equal(t, "123", oid)
@@ -82,10 +86,13 @@ func TestGetBranch(t *testing.T) {
 	ioutil.WriteFile(".ugit/refs/heads/master", []byte("123"), 0777)
 
 	// when
-	oid := GetBranch("master")
+	oid, err := GetBranch("master")
+	_, err2 := GetBranch("no_branch")
 
 	// then
 	assert.Equal(t, "123", oid)
+	assert.Nil(t, err)
+	assert.NotNil(t, err2)
 	mock.Teardown()
 }
 
