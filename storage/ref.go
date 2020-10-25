@@ -3,7 +3,9 @@ package storage
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -89,4 +91,24 @@ SetBranch write the oid the refs/heads/ref file should point to
 */
 func SetBranch(branch string, oid string) error {
 	return setRef(branch, BRANCH_DIR, oid, true, false)
+}
+
+func ListHeads() (branches []string) {
+	err := filepath.Walk(BRANCH_DIR,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			b := strings.Replace(path, BRANCH_DIR+"/", "", -1)
+			branches = append(branches, b)
+			return nil
+		})
+
+	if err != nil {
+		log.Println(err)
+	}
+	return branches
 }

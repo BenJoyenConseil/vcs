@@ -3,6 +3,7 @@ package cli
 import (
 	"log"
 	"os"
+	"strings"
 	"vcs/storage"
 	"vcs/tree"
 
@@ -37,6 +38,9 @@ var (
 	tag       = app.Command("tag", "Give a name to the current commit")
 	tagAction = tag.Action(utag)
 	tagName   = tag.Arg("name", "Usefull name to find a commit oid").Required().String()
+
+	branch       = app.Command("branch", "Print all created branches")
+	branchAction = branch.Action(ubranch)
 )
 
 func Parse(args []string) {
@@ -86,4 +90,21 @@ func utag(c *kingpin.ParseContext) error {
 	oid := tree.GetOid(ref)
 	err = storage.SetTag(*tagName, oid)
 	return err
+}
+
+func ubranch(c *kingpin.ParseContext) error {
+	ref, err := storage.GetHead()
+	if err != nil {
+		return err
+	}
+
+	branches := storage.ListHeads()
+	for _, b := range branches {
+		if strings.Contains(ref, b) {
+			log.Println("*", b)
+		} else {
+			log.Println(b)
+		}
+	}
+	return nil
 }

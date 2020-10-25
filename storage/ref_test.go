@@ -116,3 +116,20 @@ func TestSetBranch(t *testing.T) {
 
 	mock.Teardown()
 }
+
+func TestListHeads(t *testing.T) {
+	// given
+	os.MkdirAll(".ugit/refs/heads/feature", 0777)
+	ioutil.WriteFile(".ugit/refs/heads/master", []byte(""), 0777)
+	ioutil.WriteFile(".ugit/refs/heads/feature/yolo", []byte(""), 0777)
+
+	// when
+	branches := ListHeads()
+
+	// then
+	assert.ElementsMatch(t, branches, []string{
+		"master",
+		"feature/yolo",
+	})
+	mock.Teardown()
+}
