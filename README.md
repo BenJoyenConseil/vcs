@@ -37,3 +37,10 @@ using binaries
 - [x] **checkout** : restore files and folders of a specific committed snapshot
 - [x] **tag** : mark and identify a commit with a simplified name (instead of its hash)
 - [x] **branch** : tag/ref that moves to point on the last commit of the branch
+- [ ] **graph** : print branches history and tags with HEAD position
+- [ ] **diff** : see the differences of content between 2 working trees
+- [ ] **status** : show the current branch, the staging files
+- [ ] **merge** : merge content of two branches and create a merge commit with 2 parents
+- [ ] **fast-forward** : during a merge, see if HEAD is a ancestor of the head commit of the branch
+- [ ] **index** : commit only tracked files
+- [ ] **stash** : push pending changes to a heap

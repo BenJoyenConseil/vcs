@@ -79,7 +79,7 @@ func GetHead() (ref string, err error) {
 }
 
 /*
-GetBranch return the oid pointed by the refs/heads/ref file
+GetBranch returns the oid pointed by the refs/heads/ref file
 */
 func GetBranch(ref string) (oid string, err error) {
 	oid, err = getRef(ref, BRANCH_DIR)
@@ -87,12 +87,15 @@ func GetBranch(ref string) (oid string, err error) {
 }
 
 /*
-SetBranch write the oid the refs/heads/ref file should point to
+SetBranch writes the oid the refs/heads/ref file should point to
 */
 func SetBranch(branch string, oid string) error {
 	return setRef(branch, BRANCH_DIR, oid, true, false)
 }
 
+/*
+ListHeads returns the list of branches in the refs/heads directory
+*/
 func ListHeads() (branches []string) {
 	err := filepath.Walk(BRANCH_DIR,
 		func(path string, info os.FileInfo, err error) error {
