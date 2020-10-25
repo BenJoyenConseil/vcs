@@ -15,5 +15,6 @@ const (
 	HEAD_PATH      string = ".ugit/HEAD"
 	REF_DIR        string = ".ugit/refs"
 	TAG_DIR        string = ".ugit/refs/tags"
+	BRANCH_DIR     string = ".ugit/refs/heads"
 	BYTE_SEPARATOR byte   = '\x00'
 )

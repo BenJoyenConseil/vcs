@@ -36,4 +36,4 @@ using binaries
 - [x] **HEAD** : pointer to the last commit, the current working
 - [x] **checkout** : restore files and folders of a specific committed snapshot
 - [x] **tag** : mark and identify a commit with a simplified name (instead of its hash)
-- [ ] **branch** : tag/ref that moves to point on the last commit of the branch
+- [x] **branch** : tag/ref that moves to point on the last commit of the branch

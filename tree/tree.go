@@ -225,21 +225,25 @@ func PrintLog(commit *CommitNode) {
 /*
 Checkout  moves HEAD to a commit oid and restore its state (e.g files and folders)
 */
-func Checkout(oid string, basePath ...string) error {
-	storage.SetHead(oid)
-	head := storage.GetHead()
-	tree, _, _, err := GetCommit(head)
+func Checkout(ref string, basePath ...string) error {
+	oid := GetOid(ref)
+	storage.SetHead(ref)
+	tree, _, _, err := GetCommit(oid)
 	if err != nil {
 		return err
 	}
 	return ReadTree(tree, basePath...)
 }
 
+/*
+GetOid find the oid of a commit, a reference, or a tag
+*/
 func GetOid(ref string) (oid string) {
-	tag := storage.GetTag(ref)
-	if tag != "" {
-		return tag
+	if oid = storage.GetTag(ref); oid != "" {
+		return oid
+	} else if oid = storage.GetBranch(ref); oid != "" {
+		return oid
+	} else {
+		return ref
 	}
-
-	return ref
 }

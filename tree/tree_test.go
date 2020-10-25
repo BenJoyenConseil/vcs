@@ -186,14 +186,44 @@ func TestCheckout(t *testing.T) {
 	assert.Equal(t, "f37333b2d9ffbbf083b6c364a02cc555fa56ffef", string(h))
 	mock.Teardown()
 }
+func TestCheckout_Tag(t *testing.T) {
+	// given
+	mock.SetupTmpDir()
+	mock.SetupUgitDir()
+	mock.RemoveDogsAndCommit()
+	os.MkdirAll(".ugit/refs/tags", 0777)
+	rmDogCommitOid := []byte("f37333b2d9ffbbf083b6c364a02cc555fa56ffef")
+	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", rmDogCommitOid, 0777)
+
+	// when
+	err := Checkout("v0.1.0", "tmp")
+
+	// then
+	assert.Nil(t, err)
+	assert.DirExists(t, "tmp")
+	assert.FileExists(t, "tmp/cats.txt")
+	assert.DirExists(t, "tmp/other")
+	assert.FileExists(t, "tmp/other/shoes.jpg")
+	assert.NoFileExists(t, "tmp/dogs.txt")
+	h, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, "v0.1.0", string(h))
+	mock.Teardown()
+}
 
 func TestGetOid(t *testing.T) {
 	os.MkdirAll(".ugit/refs/tags", 0777)
+	os.MkdirAll(".ugit/refs/heads", 0777)
 	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
+	ioutil.WriteFile(".ugit/refs/heads/master", []byte("123"), 0777)
 
 	// when
 	oid := GetOid("v0.1.0")
+	oid2 := GetOid("object_hash")
+	oid3 := GetOid("master")
 
 	// then
 	assert.Equal(t, "123", oid)
+	assert.Equal(t, "object_hash", oid2)
+	assert.Equal(t, "123", oid3)
+	mock.Teardown()
 }
