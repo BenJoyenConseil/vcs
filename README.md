@@ -13,11 +13,39 @@ I have done some modifications
 
 ## usage
 
-    go run main.go init | commit | log | ...
-  
-using binaries
-  
-    vcs  init | commit | log | ...
+    vcs [<flags>] <command> [<args> ...]
+
+    Snapshot your working directory
+
+    Flags:
+      --help  Show context-sensitive help (also try --help-long and --help-man).
+
+    Commands:
+      help [<command>...]
+        Show help.
+
+      commit --message=MESSAGE [<flags>]
+        snapshot the current directory with an explicite message desciption
+
+      init [<dir>]
+        Setup the directory you want to be managed
+
+      log [<ref>]
+        Print the commit log history
+
+      hash_object [<flags>] <content>
+        Save an object in vcs and get its hash
+
+      checkout [<flags>] <oid>
+        Restore files and folders from a committed snapshot
+
+      tag <name>
+        Give a name to the current commit
+
+      branch
+        Print all created branches
+
+
 
 ## install
 
@@ -43,4 +71,6 @@ using binaries
 - [ ] **merge** : merge content of two branches and create a merge commit with 2 parents
 - [ ] **fast-forward** : during a merge, see if HEAD is a ancestor of the head commit of the branch
 - [ ] **index** : commit only tracked files
-- [ ] **stash** : push pending changes to a heap
+- [ ] **stash** : push pending changes to a stack and remove them of the index
+- [ ] **cherry-pick** : pick a commit from a branch and add it to another branch
+- [ ] **rebase** : play the branch history to another branch history, and get it linear
