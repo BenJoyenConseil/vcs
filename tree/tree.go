@@ -149,7 +149,7 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		return ""
 	}
 
-	storage.SetBranch(ref, oid)
+	storage.SetRef(ref, oid)
 	return oid
 }
 
@@ -271,4 +271,16 @@ func GetOid(ref string) (oid string, fullref string) {
 	}
 	oid = ref
 	return oid, ref
+}
+
+/*
+CreateTag write the oid reference into the tag's file
+*/
+func CreateTag(tag string, oid string) error {
+	if _, err := storage.GetRef(tag); err != nil {
+		err := storage.SetRef(tag, oid)
+		return err
+	}
+
+	return errors.New("This Tag already exists")
 }

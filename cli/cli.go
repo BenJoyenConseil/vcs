@@ -88,7 +88,7 @@ func utag(c *kingpin.ParseContext) error {
 		return nil
 	}
 	oid, _ := tree.GetOid(ref)
-	err = storage.SetTag(*tagName, oid)
+	err = tree.CreateTag(*tagName, oid)
 	return err
 }
 

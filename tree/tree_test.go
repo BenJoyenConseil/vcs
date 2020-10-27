@@ -248,3 +248,22 @@ func TestGetOid(t *testing.T) {
 
 	mock.Teardown()
 }
+
+func TestSetTag(t *testing.T) {
+	// given
+	os.MkdirAll(".ugit/refs/tags", 0777)
+	commitOid := "123"
+
+	// when
+	noErr := CreateTag("refs/tags/v0.1.0", commitOid)
+	fail := CreateTag("refs/tags/v0.1.0", commitOid)
+
+	// then
+	assert.Nil(t, noErr)
+	assert.NotNil(t, fail)
+	assert.FileExists(t, ".ugit/refs/tags/v0.1.0")
+
+	h, _ := ioutil.ReadFile(".ugit/refs/tags/v0.1.0")
+	assert.Equal(t, "123", string(h))
+	mock.Teardown()
+}

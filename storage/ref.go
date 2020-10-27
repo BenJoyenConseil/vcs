@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,26 +26,6 @@ func SetRef(ref string, oid string) error {
 }
 
 /*
-SetTag write the oid reference into the tag's file
-*/
-func SetTag(tag string, oid string) error {
-	if _, err := GetRef(tag); err != nil {
-		err := SetRef(tag, oid)
-		return err
-	}
-
-	return errors.New("This Tag already exists")
-}
-
-/*
-GetTag return the oid stored by the tag's file
-*/
-func GetTag(tag string) (oid string, err error) {
-	oid, err = GetRef(tag)
-	return oid, err
-}
-
-/*
 SetHead write a reference to the HEAD file
 */
 func SetHead(ref string) error {
@@ -61,24 +40,6 @@ func GetHead() (ref string, err error) {
 	d, err := ioutil.ReadFile(UGIT_DIR + "/" + HEAD_PATH)
 	ref = string(d)
 	return ref, err
-}
-
-/*
-GetBranch returns the oid pointed by the refs/heads/ref file
-*/
-func GetBranch(branch string) (oid string, err error) {
-	oid, err = GetRef(branch)
-	return oid, err
-}
-
-/*
-SetBranch writes the oid the refs/heads/ref file should point to
-*/
-func SetBranch(branch string, oid string) error {
-	if _, err := GetRef(branch); err == nil {
-		return SetRef(branch, oid)
-	}
-	return errors.New("This branch does not exist. use 'branch' command")
 }
 
 /*
