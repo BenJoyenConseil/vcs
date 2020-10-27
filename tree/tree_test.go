@@ -15,6 +15,7 @@ import (
 func TestWriteTree(t *testing.T) {
 	// given
 	mock.SetupTmpDir()
+	os.MkdirAll(".ugit/objects", 0777)
 
 	// when
 	oid, err := WriteTree("./tmp")
@@ -106,6 +107,7 @@ func TestCommit(t *testing.T) {
 	//given
 	mock.SetupTmpDir()
 	os.MkdirAll(".ugit/refs/heads", 0777)
+	os.MkdirAll(".ugit/objects", 0777)
 	ioutil.WriteFile(".ugit/refs/heads/master", nil, 0777)
 	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/master"), 0777)
 

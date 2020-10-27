@@ -71,6 +71,7 @@ func TestHashObject(t *testing.T) {
 func TestPutObject(t *testing.T) {
 	// given
 	contentToVersion := "Hello World"
+	os.MkdirAll(".ugit/objects", 0777)
 	expected := fmt.Sprintf("%s%s%s", "blob", string('\x00'), "Hello World")
 
 	// when
