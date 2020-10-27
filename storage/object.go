@@ -30,6 +30,9 @@ func UInit(dir string) {
 	if _, err := os.Stat(masterP); err != nil {
 		ioutil.WriteFile(masterP, nil, 0777)
 	}
+
+	objectsP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s", dir, UGIT_DIR, OBJECTS_DIR))
+	os.MkdirAll(objectsP, 0777)
 }
 
 /*
@@ -54,7 +57,6 @@ func PutObject(data string, objectType ...ObjectType) (oid string, err error) {
 	encoded := []byte(string(_type) + string(BYTE_SEPARATOR) + data)
 	oid = string(HashObject(encoded))
 	objectPath := fmt.Sprintf("%s/%s/%s", UGIT_DIR, OBJECTS_DIR, oid)
-	os.MkdirAll(UGIT_DIR+"/"+OBJECTS_DIR, 0777)
 	err = ioutil.WriteFile(objectPath, encoded, 0777)
 	return oid, err
 }
