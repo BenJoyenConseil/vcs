@@ -9,6 +9,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSetRef(t *testing.T) {
+	// given
+	os.MkdirAll(".ugit/refs/tags/", 0777)
+
+	// when
+	SetRef("refs/tags/v0.1.0", "hashcommit123")
+
+	//then
+	d, _ := ioutil.ReadFile(".ugit/refs/tags/v0.1.0")
+	assert.FileExists(t, ".ugit/refs/tags/v0.1.0")
+	assert.Equal(t, "hashcommit123", string(d))
+	mock.Teardown()
+}
 func TestSetHead(t *testing.T) {
 	// given
 	ref := "refs/heads/master"
@@ -43,24 +56,19 @@ func TestGetHead(t *testing.T) {
 
 func TestSetTag(t *testing.T) {
 	// given
-	os.MkdirAll(".ugit/", 0777)
+	os.MkdirAll(".ugit/refs/tags", 0777)
 	commitOid := "123"
 
 	// when
-	err1 := SetTag("v0.1.0", commitOid)
-	err2 := SetTag("v0.1.0", commitOid)
-	err3 := SetTag("refs/tags/v0.1.1", commitOid)
+	noErr := SetTag("refs/tags/v0.1.0", commitOid)
+	fail := SetTag("refs/tags/v0.1.0", commitOid)
 
 	// then
-	assert.Nil(t, err1)
-	assert.NotNil(t, err2)
+	assert.Nil(t, noErr)
+	assert.NotNil(t, fail)
 	assert.FileExists(t, ".ugit/refs/tags/v0.1.0")
 
 	h, _ := ioutil.ReadFile(".ugit/refs/tags/v0.1.0")
-	assert.Equal(t, "123", string(h))
-
-	assert.Nil(t, err3)
-	h, _ = ioutil.ReadFile(".ugit/refs/tags/v0.1.1")
 	assert.Equal(t, "123", string(h))
 	mock.Teardown()
 }
@@ -71,12 +79,10 @@ func TestGetTag(t *testing.T) {
 	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
 
 	// when
-	oid, _ := GetTag("v0.1.0")
-	oid2, _ := GetTag("refs/tags/v0.1.0")
+	oid, _ := GetTag("refs/tags/v0.1.0")
 
 	// then
 	assert.Equal(t, "123", oid)
-	assert.Equal(t, "123", oid2)
 	mock.Teardown()
 }
 
@@ -86,8 +92,8 @@ func TestGetBranch(t *testing.T) {
 	ioutil.WriteFile(".ugit/refs/heads/master", []byte("123"), 0777)
 
 	// when
-	oid, err := GetBranch("master")
-	_, err2 := GetBranch("no_branch")
+	oid, err := GetBranch("refs/heads/master")
+	_, err2 := GetBranch("refs/heads/no_branch")
 
 	// then
 	assert.Equal(t, "123", oid)
@@ -103,8 +109,8 @@ func TestSetBranch(t *testing.T) {
 	commitOid := "123"
 
 	// when
-	err1 := SetBranch("master", commitOid)
-	err2 := SetBranch("branch_does_not_exist", commitOid)
+	err1 := SetBranch("refs/heads/master", commitOid)
+	err2 := SetBranch("refs/heads/branch_does_not_exist", commitOid)
 
 	// then
 	assert.Nil(t, err1)

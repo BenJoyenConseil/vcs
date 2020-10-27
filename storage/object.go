@@ -18,10 +18,10 @@ func UInit(dir string) {
 	headP, _ := filepath.Abs(fmt.Sprintf("%s/%s/HEAD", dir, UGIT_DIR))
 	ioutil.WriteFile(headP, []byte("refs/heads/master"), 0777)
 
-	branchesP, _ := filepath.Abs(fmt.Sprintf("%s/%s", dir, BRANCH_DIR))
+	branchesP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s", dir, UGIT_DIR, BRANCH_DIR))
 	os.MkdirAll(branchesP, 0777)
 
-	masterP, _ := filepath.Abs(fmt.Sprintf("%s/%s/master", dir, BRANCH_DIR))
+	masterP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s/master", dir, UGIT_DIR, BRANCH_DIR))
 	ioutil.WriteFile(masterP, nil, 0777)
 }
 
@@ -46,8 +46,8 @@ func PutObject(data string, objectType ...ObjectType) (oid string, err error) {
 	}
 	encoded := []byte(string(_type) + string(BYTE_SEPARATOR) + data)
 	oid = string(HashObject(encoded))
-	objectPath := fmt.Sprintf("%s/%s", OBJECTS_DIR, oid)
-	os.MkdirAll(OBJECTS_DIR, 0777)
+	objectPath := fmt.Sprintf("%s/%s/%s", UGIT_DIR, OBJECTS_DIR, oid)
+	os.MkdirAll(UGIT_DIR+"/"+OBJECTS_DIR, 0777)
 	err = ioutil.WriteFile(objectPath, encoded, 0777)
 	return oid, err
 }
@@ -56,7 +56,7 @@ func PutObject(data string, objectType ...ObjectType) (oid string, err error) {
 GetObject returns the content of the file, and its type
 */
 func GetObject(oid string) (string, ObjectType, error) {
-	objectPath := fmt.Sprintf("%s/%s", OBJECTS_DIR, oid)
+	objectPath := fmt.Sprintf("%s/%s/%s", UGIT_DIR, OBJECTS_DIR, oid)
 	data, err := ioutil.ReadFile(objectPath)
 	if err != nil {
 		return "", ObjectType(""), err

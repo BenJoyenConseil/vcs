@@ -25,6 +25,8 @@ func SetupUgitDir() {
 	os.MkdirAll(".ugit/refs/heads", 0777)
 	ioutil.WriteFile(".ugit/refs/heads/master", []byte("cdf776713053cc0710735a61dfbe6492f3ed31b2"), 0777)
 	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/master"), 0777)
+	os.MkdirAll(".ugit/refs/tags", 0777)
+	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("93584d4997160f16e3ac4390ec4008a2d2ff32d6"), 0777)
 }
 
 func RemoveDogsAndCommit() {

@@ -11,10 +11,10 @@ const (
 
 const (
 	UGIT_DIR       string = ".ugit"
-	OBJECTS_DIR    string = ".ugit/objects"
-	HEAD_PATH      string = ".ugit/HEAD"
-	REF_DIR        string = ".ugit/refs"
-	TAG_DIR        string = ".ugit/refs/tags"
-	BRANCH_DIR     string = ".ugit/refs/heads"
+	OBJECTS_DIR    string = "objects"
+	HEAD_PATH      string = "HEAD"
+	REF_DIR        string = "refs"
+	TAG_DIR        string = "refs/tags"
+	BRANCH_DIR     string = "refs/heads"
 	BYTE_SEPARATOR byte   = '\x00'
 )

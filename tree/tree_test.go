@@ -126,7 +126,7 @@ func TestCommit(t *testing.T) {
 	assert.Equal(t, "parent ", lines[1])
 	assert.Equal(t, "add something and snapshot it !", lines[3])
 
-	mock.Teardown()
+	//mock.Teardown()
 }
 
 func TestGetCommit(t *testing.T) {
@@ -209,24 +209,42 @@ func TestCheckout_Tag(t *testing.T) {
 	assert.FileExists(t, "tmp/other/shoes.jpg")
 	assert.NoFileExists(t, "tmp/dogs.txt")
 	h, _ := ioutil.ReadFile(".ugit/HEAD")
-	assert.Equal(t, "v0.1.0", string(h))
+	assert.Equal(t, "refs/tags/v0.1.0", string(h))
 	mock.Teardown()
 }
 
 func TestGetOid(t *testing.T) {
-	os.MkdirAll(".ugit/refs/tags", 0777)
-	os.MkdirAll(".ugit/refs/heads", 0777)
-	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
-	ioutil.WriteFile(".ugit/refs/heads/master", []byte("123"), 0777)
+	mock.SetupUgitDir()
+
+	// when tag
+	oid, fullref := GetOid("v0.1.0")
+	oid2, fullref2 := GetOid("refs/tags/v0.1.0")
+	// then tag
+	assert.Equal(t, "93584d4997160f16e3ac4390ec4008a2d2ff32d6", oid)
+	assert.Equal(t, "refs/tags/v0.1.0", fullref)
+	assert.Equal(t, "93584d4997160f16e3ac4390ec4008a2d2ff32d6", oid2)
+	assert.Equal(t, "refs/tags/v0.1.0", fullref2)
+
+	// when commit
+	oid, fullref = GetOid("323460bfcda38ee6c31f2177e99d7bf1717bf60e")
+	// then
+	assert.Equal(t, "323460bfcda38ee6c31f2177e99d7bf1717bf60e", oid)
+	assert.Equal(t, "323460bfcda38ee6c31f2177e99d7bf1717bf60e", fullref)
 
 	// when
-	oid := GetOid("v0.1.0")
-	oid2 := GetOid("object_hash")
-	oid3 := GetOid("master")
-
+	oid, fullref = GetOid("master")
+	oid2, fullref2 = GetOid("refs/heads/master")
 	// then
-	assert.Equal(t, "123", oid)
-	assert.Equal(t, "object_hash", oid2)
-	assert.Equal(t, "123", oid3)
+	assert.Equal(t, "cdf776713053cc0710735a61dfbe6492f3ed31b2", oid)
+	assert.Equal(t, "refs/heads/master", fullref)
+	assert.Equal(t, "cdf776713053cc0710735a61dfbe6492f3ed31b2", oid2)
+	assert.Equal(t, "refs/heads/master", fullref2)
+
+	// when custom ref
+	oid, fullref = GetOid("HEAD")
+	// then
+	assert.Equal(t, "refs/heads/master", oid)
+	assert.Equal(t, "HEAD", fullref)
+
 	mock.Teardown()
 }

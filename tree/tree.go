@@ -138,7 +138,7 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 		return ""
 	}
 
-	oidParent := GetOid(ref)
+	oidParent, _ := GetOid(ref)
 	commit := fmt.Sprintf("%s %s\n", storage.TREE, oid)
 	commit += fmt.Sprintf("%s %s\n", storage.PARENT, oidParent)
 	commit += fmt.Sprintf("\n%s", message)
@@ -190,7 +190,7 @@ func Log(ref ...string) *CommitNode {
 	var headNode *CommitNode
 
 	r, err := storage.GetHead()
-	oid := GetOid(r)
+	oid, _ := GetOid(r)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -241,8 +241,8 @@ func PrintLog(commit *CommitNode) {
 Checkout  moves HEAD to a commit oid and restore its state (e.g files and folders)
 */
 func Checkout(ref string, basePath ...string) error {
-	oid := GetOid(ref)
-	storage.SetHead(ref)
+	oid, fullref := GetOid(ref)
+	storage.SetHead(fullref)
 	tree, _, _, err := GetCommit(oid)
 	if err != nil {
 		return err
@@ -253,12 +253,22 @@ func Checkout(ref string, basePath ...string) error {
 /*
 GetOid find the oid of a commit, a reference, or a tag
 */
-func GetOid(ref string) (oid string) {
-	if oid, err := storage.GetTag(ref); err == nil {
-		return oid
+func GetOid(ref string) (oid string, fullref string) {
+	refsToTry := []string{
+		fmt.Sprintf("%s", ref),
+		fmt.Sprintf("%s/%s", storage.REF_DIR, ref),
+		fmt.Sprintf("%s/%s", storage.TAG_DIR, ref),
+		fmt.Sprintf("%s/%s", storage.BRANCH_DIR, ref),
 	}
-	if oid, err := storage.GetBranch(ref); err == nil {
-		return oid
+	for _, fullref := range refsToTry {
+		if oid, err := storage.GetRef(fullref); err == nil {
+			return oid, fullref
+		}
 	}
-	return ref
+	if _, _, _, err := GetCommit(ref); err != nil {
+		log.Printf("The ref or commit %s does not exist. Error %s\n", ref, err)
+		return "", ""
+	}
+	oid = ref
+	return oid, ref
 }

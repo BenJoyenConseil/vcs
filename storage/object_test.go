@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"vcs/mock"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -51,15 +52,14 @@ func TestPutObject(t *testing.T) {
 	assert.Equal(t, result, []byte(expected))
 
 	// teardown
-	os.Remove("tmp")
-	os.RemoveAll(".ugit/")
+	mock.Teardown()
 }
 
 func TestGetObject(t *testing.T) {
 	// given
 	oid := "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 	objectContent := "Hello World"
-	os.MkdirAll(OBJECTS_DIR, 0777)
+	os.MkdirAll(".ugit/objects/", 0777)
 	ioutil.WriteFile(".ugit/objects/"+oid, []byte("blob"+string('\x00')+objectContent), 0777)
 
 	//when
@@ -71,5 +71,5 @@ func TestGetObject(t *testing.T) {
 	assert.Equal(t, _type, BLOB)
 
 	// teardown
-	os.RemoveAll(".ugit")
+	mock.Teardown()
 }
