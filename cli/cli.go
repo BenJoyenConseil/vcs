@@ -89,6 +89,7 @@ func utag(c *kingpin.ParseContext) error {
 	}
 	oid, _ := tree.GetOid(ref)
 	err = tree.CreateTag(*tagName, oid)
+	log.Println("Commit", oid, "tagged with", *tagName)
 	return err
 }
 

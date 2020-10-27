@@ -16,13 +16,20 @@ func UInit(dir string) {
 	os.MkdirAll(initDir, 0777)
 
 	headP, _ := filepath.Abs(fmt.Sprintf("%s/%s/HEAD", dir, UGIT_DIR))
-	ioutil.WriteFile(headP, []byte("refs/heads/master"), 0777)
+	if _, err := os.Stat(headP); err != nil {
+		ioutil.WriteFile(headP, []byte("refs/heads/master"), 0777)
+	}
 
 	branchesP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s", dir, UGIT_DIR, BRANCH_DIR))
 	os.MkdirAll(branchesP, 0777)
 
+	tagsP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s", dir, UGIT_DIR, TAG_DIR))
+	os.MkdirAll(tagsP, 0777)
+
 	masterP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s/master", dir, UGIT_DIR, BRANCH_DIR))
-	ioutil.WriteFile(masterP, nil, 0777)
+	if _, err := os.Stat(headP); err != nil {
+		ioutil.WriteFile(masterP, nil, 0777)
+	}
 }
 
 /*

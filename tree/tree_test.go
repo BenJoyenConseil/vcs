@@ -249,14 +249,14 @@ func TestGetOid(t *testing.T) {
 	mock.Teardown()
 }
 
-func TestSetTag(t *testing.T) {
+func TestCreateTag(t *testing.T) {
 	// given
 	os.MkdirAll(".ugit/refs/tags", 0777)
 	commitOid := "123"
 
 	// when
-	noErr := CreateTag("refs/tags/v0.1.0", commitOid)
-	fail := CreateTag("refs/tags/v0.1.0", commitOid)
+	noErr := CreateTag("v0.1.0", commitOid)
+	fail := CreateTag("v0.1.0", commitOid)
 
 	// then
 	assert.Nil(t, noErr)

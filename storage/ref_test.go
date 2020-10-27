@@ -24,11 +24,10 @@ func TestSetRef(t *testing.T) {
 }
 func TestSetHead(t *testing.T) {
 	// given
-	ref := "refs/heads/master"
 	os.MkdirAll(".ugit/", 0777)
 
 	// when
-	SetHead(ref)
+	SetHead("refs/heads/master")
 
 	// then
 	assert.FileExists(t, ".ugit/HEAD")

@@ -277,6 +277,7 @@ func GetOid(ref string) (oid string, fullref string) {
 CreateTag write the oid reference into the tag's file
 */
 func CreateTag(tag string, oid string) error {
+	tag = fmt.Sprintf("%s/%s", storage.TAG_DIR, tag)
 	if _, err := storage.GetRef(tag); err != nil {
 		err := storage.SetRef(tag, oid)
 		return err

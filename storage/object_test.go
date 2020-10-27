@@ -27,6 +27,30 @@ func TestUInit(t *testing.T) {
 	d, _ = ioutil.ReadFile(".ugit/refs/heads/master")
 	assert.Equal(t, "", string(d))
 }
+func TestUInit_GracefullWhenAllreadyExists(t *testing.T) {
+	// given
+	mock.SetupUgitDir()
+
+	// when
+	UInit(".")
+
+	// then
+	assert.DirExists(t, ".ugit")
+	assert.FileExists(t, ".ugit/HEAD")
+	assert.DirExists(t, ".ugit/refs/heads/")
+	assert.FileExists(t, ".ugit/refs/heads/master")
+	assert.FileExists(t, ".ugit/refs/tags/v0.1.0")
+
+	d, _ := ioutil.ReadFile(".ugit/HEAD")
+	assert.Equal(t, "refs/heads/master", string(d))
+
+	d, _ = ioutil.ReadFile(".ugit/refs/heads/master")
+	assert.Equal(t, "cdf776713053cc0710735a61dfbe6492f3ed31b2", string(d))
+	d, _ = ioutil.ReadFile(".ugit/refs/tags/v0.1.0")
+	assert.Equal(t, "93584d4997160f16e3ac4390ec4008a2d2ff32d6", string(d))
+
+	mock.Teardown()
+}
 
 func TestHashObject(t *testing.T) {
 	// given
