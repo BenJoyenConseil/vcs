@@ -242,7 +242,12 @@ Checkout  moves HEAD to a commit oid and restore its state (e.g files and folder
 */
 func Checkout(ref string, basePath ...string) error {
 	oid, fullref := GetOid(ref)
-	storage.SetHead(fullref)
+	if strings.Contains(fullref, storage.BRANCH_DIR) {
+		storage.SetHead(fullref)
+	} else {
+		log.Println("Detached HEAD mode")
+		storage.SetHead(oid)
+	}
 	tree, _, _, err := GetCommit(oid)
 	if err != nil {
 		return err

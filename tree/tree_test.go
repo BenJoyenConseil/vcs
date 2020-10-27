@@ -128,7 +128,7 @@ func TestCommit(t *testing.T) {
 	assert.Equal(t, "parent ", lines[1])
 	assert.Equal(t, "add something and snapshot it !", lines[3])
 
-	//mock.Teardown()
+	mock.Teardown()
 }
 
 func TestGetCommit(t *testing.T) {
@@ -210,8 +210,10 @@ func TestCheckout_Tag(t *testing.T) {
 	assert.DirExists(t, "tmp/other")
 	assert.FileExists(t, "tmp/other/shoes.jpg")
 	assert.NoFileExists(t, "tmp/dogs.txt")
+
 	h, _ := ioutil.ReadFile(".ugit/HEAD")
-	assert.Equal(t, "refs/tags/v0.1.0", string(h))
+	assert.Equal(t, "f37333b2d9ffbbf083b6c364a02cc555fa56ffef", string(h))
+
 	mock.Teardown()
 }
 
