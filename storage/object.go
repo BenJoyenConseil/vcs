@@ -27,7 +27,7 @@ func UInit(dir string) {
 	os.MkdirAll(tagsP, 0777)
 
 	masterP, _ := filepath.Abs(fmt.Sprintf("%s/%s/%s/master", dir, UGIT_DIR, BRANCH_DIR))
-	if _, err := os.Stat(headP); err != nil {
+	if _, err := os.Stat(masterP); err != nil {
 		ioutil.WriteFile(masterP, nil, 0777)
 	}
 }

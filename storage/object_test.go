@@ -26,6 +26,8 @@ func TestUInit(t *testing.T) {
 	assert.FileExists(t, ".ugit/refs/heads/master")
 	d, _ = ioutil.ReadFile(".ugit/refs/heads/master")
 	assert.Equal(t, "", string(d))
+
+	mock.Teardown()
 }
 func TestUInit_GracefullWhenAllreadyExists(t *testing.T) {
 	// given

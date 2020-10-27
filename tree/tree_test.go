@@ -219,7 +219,7 @@ func TestGetOid(t *testing.T) {
 	// when tag
 	oid, fullref := GetOid("v0.1.0")
 	oid2, fullref2 := GetOid("refs/tags/v0.1.0")
-	// then tag
+	// then
 	assert.Equal(t, "93584d4997160f16e3ac4390ec4008a2d2ff32d6", oid)
 	assert.Equal(t, "refs/tags/v0.1.0", fullref)
 	assert.Equal(t, "93584d4997160f16e3ac4390ec4008a2d2ff32d6", oid2)
@@ -231,7 +231,7 @@ func TestGetOid(t *testing.T) {
 	assert.Equal(t, "323460bfcda38ee6c31f2177e99d7bf1717bf60e", oid)
 	assert.Equal(t, "323460bfcda38ee6c31f2177e99d7bf1717bf60e", fullref)
 
-	// when
+	// when branch
 	oid, fullref = GetOid("master")
 	oid2, fullref2 = GetOid("refs/heads/master")
 	// then
