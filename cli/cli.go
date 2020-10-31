@@ -34,6 +34,7 @@ var (
 	oidCheckout    = checkout.Arg("oid", "The commit oid").Required().String()
 	checkoutAction = checkout.Action(ucheckout)
 	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default(".").Short('d').String()
+	checkoutBranch = checkout.Flag("branch", "Checkout a specific branch").Short('b').String()
 
 	tag       = app.Command("tag", "Give a name to the current commit")
 	tagAction = tag.Action(utag)
@@ -41,6 +42,7 @@ var (
 
 	branch       = app.Command("branch", "Print all created branches")
 	branchAction = branch.Action(ubranch)
+	branchName   = branch.Arg("name", "The branch name").String()
 )
 
 func Parse(args []string) {
@@ -96,6 +98,11 @@ func utag(c *kingpin.ParseContext) error {
 func ubranch(c *kingpin.ParseContext) error {
 	ref, err := storage.GetHead()
 	if err != nil {
+		return err
+	}
+	if *branchName != "" {
+		oid, _ := tree.GetOid(ref)
+		err := tree.CreateBranch(*branchName, oid)
 		return err
 	}
 

@@ -290,3 +290,17 @@ func CreateTag(tag string, oid string) error {
 
 	return errors.New("This Tag already exists")
 }
+
+func CreateBranch(branch string, oid string) error {
+	if oid == "" {
+		return errors.New("Cannot create a branch using an empty oid / ref. You should create one before")
+	}
+	branch = fmt.Sprintf("%s/%s", storage.BRANCH_DIR, branch)
+
+	if _, err := storage.GetRef(branch); err != nil {
+		err := storage.SetRef(branch, oid)
+		return err
+	}
+
+	return errors.New("This Branch already exists")
+}

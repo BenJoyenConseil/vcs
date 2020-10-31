@@ -271,3 +271,24 @@ func TestCreateTag(t *testing.T) {
 	assert.Equal(t, "123", string(h))
 	mock.Teardown()
 }
+
+func TestCreateBranch(t *testing.T) {
+
+	// given
+	os.MkdirAll(".ugit/refs/heads", 0777)
+	commitOid := "123"
+
+	// when
+	err := CreateBranch("hotfix-123", commitOid)
+	failAlreadyExists := CreateBranch("hotfix-123", commitOid)
+	failNoCommit := CreateBranch("new", "")
+
+	// then
+	h, _ := ioutil.ReadFile(".ugit/refs/heads/hotfix-123")
+	assert.Equal(t, "123", string(h))
+	assert.Nil(t, err)
+	assert.NotNil(t, failAlreadyExists)
+	assert.NotNil(t, failNoCommit)
+
+	mock.Teardown()
+}
