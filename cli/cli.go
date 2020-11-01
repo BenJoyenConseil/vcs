@@ -34,7 +34,6 @@ var (
 	oidCheckout    = checkout.Arg("oid", "The commit oid").Required().String()
 	checkoutAction = checkout.Action(ucheckout)
 	checkoutDir    = checkout.Flag("dir", "Force to use a specific vcs directory").Default(".").Short('d').String()
-	checkoutBranch = checkout.Flag("branch", "Checkout a specific branch").Short('b').String()
 
 	tag       = app.Command("tag", "Give a name to the current commit")
 	tagAction = tag.Action(utag)

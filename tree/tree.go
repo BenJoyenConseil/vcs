@@ -126,7 +126,7 @@ Commit takes a snapshot of the directory and add message plus metadata
 */
 func Commit(dir string, message string, metadata ...string) (oid string) {
 	log.Println("Snapshoting the following directory : ", dir)
-	oid, err := WriteTree(dir)
+	oidTree, err := WriteTree(dir)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -139,7 +139,7 @@ func Commit(dir string, message string, metadata ...string) (oid string) {
 	}
 
 	oidParent, _ := GetOid(ref)
-	commit := fmt.Sprintf("%s %s\n", storage.TREE, oid)
+	commit := fmt.Sprintf("%s %s\n", storage.TREE, oidTree)
 	commit += fmt.Sprintf("%s %s\n", storage.PARENT, oidParent)
 	commit += fmt.Sprintf("\n%s", message)
 
@@ -188,12 +188,13 @@ Log iterates over the commits to build a linked list structure starting from the
 func Log(ref ...string) *CommitNode {
 	var currentNode *CommitNode
 	var headNode *CommitNode
+	var oid string
 
-	r, err := storage.GetHead()
-	oid, _ := GetOid(r)
-	if err != nil {
-		log.Println(err)
-		return nil
+	if len(ref) <= 0 {
+		r, _ := storage.GetHead()
+		oid, _ = GetOid(r)
+	} else {
+		oid, _ = GetOid(ref[0])
 	}
 
 	_, parent, message, err := GetCommit(oid)
@@ -224,12 +225,21 @@ PrintLog takes a linked list of commits and prints them
 */
 func PrintLog(commit *CommitNode) {
 	current := commit
+	oidsMap := storage.MapOidRefs()
 	for current != nil {
 		char := "|"
 		if current.parent == nil {
 			char = " "
 		}
-		fmt.Println("*", "commit", current.oid)
+		refStr := "("
+		for i, r := range oidsMap[current.oid] {
+			refStr += r
+			if i < len(oidsMap[current.oid])-1 {
+				refStr += ", "
+			}
+		}
+		refStr += ")"
+		fmt.Printf("* commit %s %s\n", current.oid, refStr)
 		fmt.Println(char)
 		fmt.Println(char, "\t", current.message)
 		fmt.Println(char)
@@ -291,6 +301,9 @@ func CreateTag(tag string, oid string) error {
 	return errors.New("This Tag already exists")
 }
 
+/*
+CreateBranch write the oid into a new branch file
+*/
 func CreateBranch(branch string, oid string) error {
 	if oid == "" {
 		return errors.New("Cannot create a branch using an empty oid / ref. You should create one before")

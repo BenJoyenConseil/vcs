@@ -167,6 +167,18 @@ func TestLog(t *testing.T) {
 	assert.Contains(t, commitLog.parent.parent.oid, "323460bfcda38ee6c31f2177e99d7bf1717bf60e")
 	assert.Equal(t, commitLog.parent.parent.message, "add something and snapshot it !")
 
+	// when
+	commitLog = Log("v0.1.0")
+
+	// then
+	assert.Contains(t, commitLog.oid, "93584d4997160f16e3ac4390ec4008a2d2ff32d6")
+	assert.Equal(t, "move you HEAD !", commitLog.message)
+
+	assert.Contains(t, commitLog.parent.oid, "323460bfcda38ee6c31f2177e99d7bf1717bf60e")
+	assert.Equal(t, commitLog.parent.message, "add something and snapshot it !")
+
+	assert.Nil(t, commitLog.parent.parent)
+
 	mock.Teardown()
 }
 
@@ -284,6 +296,7 @@ func TestCreateBranch(t *testing.T) {
 	failNoCommit := CreateBranch("new", "")
 
 	// then
+	assert.FileExists(t, ".ugit/refs/heads/hotfix-123")
 	h, _ := ioutil.ReadFile(".ugit/refs/heads/hotfix-123")
 	assert.Equal(t, "123", string(h))
 	assert.Nil(t, err)

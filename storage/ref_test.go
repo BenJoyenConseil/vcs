@@ -69,3 +69,21 @@ func TestListHeads(t *testing.T) {
 	})
 	mock.Teardown()
 }
+
+func TestListRefs(t *testing.T) {
+	// given
+	os.MkdirAll(".ugit/refs/heads/feature", 0777)
+	os.MkdirAll(".ugit/refs/tags", 0777)
+	ioutil.WriteFile(".ugit/refs/heads/master", []byte("123"), 0777)
+	ioutil.WriteFile(".ugit/refs/heads/feature/yolo", []byte("124"), 0777)
+	ioutil.WriteFile(".ugit/refs/tags/v0.1.0", []byte("123"), 0777)
+	ioutil.WriteFile(".ugit/HEAD", []byte("refs/heads/feature/yolo"), 0777)
+
+	// when
+	refs := MapOidRefs()
+
+	// then
+	assert.Equal(t, []string{"master", "v0.1.0"}, refs["123"])
+	assert.Equal(t, []string{"HEAD", "feature/yolo"}, refs["124"])
+	mock.Teardown()
+}
