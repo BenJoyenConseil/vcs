@@ -21,6 +21,8 @@ func GetRef(ref string) (oid string, err error) {
 SetRef write the oid reference into the reference's file
 */
 func SetRef(ref string, oid string) error {
+	p := filepath.Dir(UGIT_DIR + "/" + ref)
+	os.MkdirAll(p, 0777)
 	err := ioutil.WriteFile(UGIT_DIR+"/"+ref, []byte(oid), 0777)
 	return err
 }

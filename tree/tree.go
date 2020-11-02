@@ -314,7 +314,7 @@ func CreateBranch(branch string, oid string) error {
 	branch = fmt.Sprintf("%s/%s", storage.BRANCH_DIR, branch)
 
 	if _, err := storage.GetRef(branch); err != nil {
-		err := storage.SetRef(branch, oid)
+		err = storage.SetRef(branch, oid)
 		return err
 	}
 

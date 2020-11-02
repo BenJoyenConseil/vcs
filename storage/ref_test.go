@@ -15,11 +15,13 @@ func TestSetRef(t *testing.T) {
 
 	// when
 	SetRef("refs/tags/v0.1.0", "hashcommit123")
+	SetRef("refs/heads/feature/one", "hashcommit124")
 
 	//then
 	d, _ := ioutil.ReadFile(".ugit/refs/tags/v0.1.0")
 	assert.FileExists(t, ".ugit/refs/tags/v0.1.0")
 	assert.Equal(t, "hashcommit123", string(d))
+	assert.FileExists(t, ".ugit/refs/heads/feature/one")
 	mock.Teardown()
 }
 func TestSetHead(t *testing.T) {
