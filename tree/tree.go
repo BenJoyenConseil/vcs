@@ -231,14 +231,17 @@ func PrintLog(commit *CommitNode) {
 		if current.parent == nil {
 			char = " "
 		}
-		refStr := "("
-		for i, r := range oidsMap[current.oid] {
-			refStr += r
-			if i < len(oidsMap[current.oid])-1 {
-				refStr += ", "
+		refStr := ""
+		if len(oidsMap[current.oid]) > 0 {
+			refStr += "("
+			for i, r := range oidsMap[current.oid] {
+				refStr += r
+				if i < len(oidsMap[current.oid])-1 {
+					refStr += ", "
+				}
 			}
+			refStr += ")"
 		}
-		refStr += ")"
 		fmt.Printf("* commit %s %s\n", current.oid, refStr)
 		fmt.Println(char)
 		fmt.Println(char, "\t", current.message)

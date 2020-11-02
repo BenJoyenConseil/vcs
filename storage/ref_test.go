@@ -85,5 +85,11 @@ func TestListRefs(t *testing.T) {
 	// then
 	assert.Equal(t, []string{"master", "v0.1.0"}, refs["123"])
 	assert.Equal(t, []string{"HEAD", "feature/yolo"}, refs["124"])
+
+	// when HEAD detached
+	ioutil.WriteFile(".ugit/HEAD", []byte("123"), 0777)
+	refs = MapOidRefs()
+	assert.Equal(t, []string{"HEAD", "master", "v0.1.0"}, refs["123"])
+
 	mock.Teardown()
 }

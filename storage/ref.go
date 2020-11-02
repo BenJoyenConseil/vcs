@@ -72,10 +72,13 @@ func MapOidRefs() (oidRefs map[string][]string) {
 	searchPath := UGIT_DIR + "/" + REF_DIR
 	oidRefs = map[string][]string{}
 	headRef, _ := GetHead()
-	headOid, _ := GetRef(headRef)
+	headOid, err := GetRef(headRef)
+	if err != nil {
+		headOid = headRef
+	}
 	oidRefs[headOid] = append([]string{}, "HEAD")
 
-	err := filepath.Walk(
+	err = filepath.Walk(
 		searchPath,
 		func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
